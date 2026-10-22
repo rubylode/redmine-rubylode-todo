@@ -1,0 +1,20 @@
+# A throwaway Redmine 7 to try the plugin in. Not the real tracker.
+# Start: docker compose up -d, then open http://localhost:3007 (admin / admin, change it on first login).
+# The repository is mounted as the plugin, so a code change shows after "docker compose restart redmine".
+# Wipe it: docker compose down -v
+services:
+  redmine:
+    image: redmine:7.0.2
+    container_name: redmine-todo-dev
+    ports:
+      - "127.0.0.1:3007:3000"
+    environment:
+      RAILS_ENV: development
+    volumes:
+      - .:/usr/src/redmine/plugins/redmine_todo
+      - redmine-todo-files:/usr/src/redmine/files
+      - redmine-todo-sqlite:/usr/src/redmine/sqlite
+
+volumes:
+  redmine-todo-files:
+  redmine-todo-sqlite:

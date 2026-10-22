@@ -1,0 +1,2 @@
+redmine: docker compose up redmine
+logs: docker compose logs -f redmine

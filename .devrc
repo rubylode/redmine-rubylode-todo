@@ -1,0 +1,2 @@
+# The log tail may exit without taking the Redmine container down.
+CAN_DIE=logs

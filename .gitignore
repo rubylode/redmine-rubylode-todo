@@ -1,0 +1,7 @@
+.env
+.DS_Store
+.overmind.sock
+tmp/
+log/
+coverage/
+node_modules/
