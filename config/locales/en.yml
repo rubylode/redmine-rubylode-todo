@@ -13,4 +13,5 @@ en:
   label_todo_fold_line: Fold or unfold the lines below
   label_todo_new_line: Add a line and press Enter
   text_todo_confirm_close_subtree: "Closing this also closes %{count} open ticket(s) below it. Continue?"
+  text_todo_confirm_reopen_subtree: "Reopening this also reopens %{count} closed ticket(s) below it. Continue?"
   text_todo_request_failed: The change could not be saved. Reload the page and try again.

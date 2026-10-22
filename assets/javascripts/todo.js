@@ -5,7 +5,7 @@ import { application } from "controllers/application"
 // so what is on the page is always what the server stored.
 class TodoController extends Controller {
   static targets = ["list", "message", "newLine"]
-  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, failure: String }
+  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, failure: String }
 
   connect() {
     this.closedThisVisit = new Set()
@@ -126,7 +126,13 @@ class TodoController extends Controller {
     line.classList.toggle("todo-line-closed", checkbox.checked) // cross out at once; undone if the server refuses
     const path = `${this.linePath(line.dataset.ticketId)}/close`
     if (!checkbox.checked) {
-      return this.finishToggle(checkbox, await this.send("DELETE", path))
+      let reopened = await this.send("DELETE", path, {}, { quiet: [409] })
+      if (reopened === false && this.lastStatus === 409) {
+        const message = this.confirmReopenSubtreeValue.replace("%{count}", this.lastBody.closed_descendant_count)
+        if (!window.confirm(message)) return this.finishToggle(checkbox, false)
+        reopened = await this.send("DELETE", path, { reopen_subtree: "1" })
+      }
+      return this.finishToggle(checkbox, reopened)
     }
 
     // The line and the lines below it stay in place, crossed out, until the page is reloaded.

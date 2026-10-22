@@ -70,4 +70,35 @@ test "a person who may not edit tickets cannot close one" do
   assert_response :unprocessable_content
   assert_not @ticket.reload.closed?
 end
+
+def close_family
+    child = Issue.generate!(project_id: @project.id, subject: "Find the bill", parent_issue_id: @ticket.id)
+    grandchild = Issue.generate!(project_id: @project.id, subject: "Look in the drawer", parent_issue_id: child.id)
+    post "/projects/ecookbook/todo/lines/#{@ticket.id}/close", params: { close_subtree: "1" }
+    [child, grandchild]
+  end
+
+  test "unchecking a parent whose children are closed asks first and changes nothing" do
+    child, grandchild = close_family
+    delete "/projects/ecookbook/todo/lines/#{@ticket.id}/close"
+    assert_response :conflict
+    assert_equal 2, response.parsed_body["closed_descendant_count"]
+    assert_equal [true, true, true], [@ticket, child, grandchild].map { |ticket| ticket.reload.closed? }
+  end
+
+  test "confirming reopens the parent and every closed ticket below it" do
+    child, grandchild = close_family
+    delete "/projects/ecookbook/todo/lines/#{@ticket.id}/close", params: { reopen_subtree: "1" }
+    assert_response :success
+    assert_equal [false, false, false], [@ticket, child, grandchild].map { |ticket| ticket.reload.closed? }
+  end
+
+  test "a subtree that cannot be reopened completely is left as it was" do
+    child, grandchild = close_family
+    grandchild.reload.update_columns(tracker_id: 2) # a tracker whose workflow lets nobody reopen
+    WorkflowTransition.where(role_id: 1, tracker_id: 2).delete_all
+    delete "/projects/ecookbook/todo/lines/#{@ticket.id}/close", params: { reopen_subtree: "1" }
+    assert_response :unprocessable_content
+    assert_equal [true, true, true], [@ticket, child, grandchild].map { |ticket| ticket.reload.closed? }
+  end
 end

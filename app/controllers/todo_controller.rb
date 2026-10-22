@@ -65,8 +65,21 @@ class TodoController < ApplicationController
     failure ? render_failure(failure) : render(json: { id: @ticket.id })
   end
 
+  # Undoes a close, including the tickets below it that are closed, after one confirmation.
   def reopen
-    failure = change_status(@ticket) { |ticket| allowed_status(ticket, ticket.tracker.default_status) }
+    closed_descendants = @ticket.descendants.select(&:closed?)
+    if closed_descendants.any? && params[:reopen_subtree] != "1"
+      return render json: { closed_descendant_count: closed_descendants.size }, status: :conflict
+    end
+
+    failure = nil
+    Issue.transaction do
+      ([@ticket] + closed_descendants).each do |ticket|
+        ticket.reload
+        failure = change_status(ticket) { |editable_ticket| allowed_status(editable_ticket, editable_ticket.tracker.default_status) }
+        raise ActiveRecord::Rollback if failure
+      end
+    end
     failure ? render_failure(failure) : render(json: { id: @ticket.id })
   end
 
