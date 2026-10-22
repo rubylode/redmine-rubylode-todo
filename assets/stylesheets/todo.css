@@ -19,15 +19,15 @@
 .todo .todo-line-text { overflow-wrap: anywhere; }
 
 /* Redmine opens the tooltip at the line's left edge, over the checkboxes of the lines below.
-   Here it opens at the middle of the line, waits half a second, and never takes the pointer. */
+   Here it opens just right of the pointer (placed by the controller), waits a moment, and never takes the pointer. */
 .todo div.tooltip span.tip {
   display: block; visibility: hidden; opacity: 0; pointer-events: none;
-  position: absolute; inset-block-start: 100%; inset-inline-start: 50%;
+  position: absolute; inset-block-start: var(--tip-top, 100%); inset-inline-start: var(--tip-left, 50%);
   transition: opacity 0.15s ease 0s, visibility 0s linear 0s;
 }
 .todo div.tooltip:hover span.tip {
   visibility: visible; opacity: 1;
-  transition: opacity 0.15s ease 0.5s, visibility 0s linear 0.5s;
+  transition: opacity 0.15s ease 0.3s, visibility 0s linear 0.3s;
 }
 
 /* Folding: an arrow on lines that have children; a folded line hides its nested list. */

@@ -151,7 +151,19 @@ class TodoController extends Controller {
     }
   }
 
-  // Dragging: the upper quarter of a line puts the dragged line before it, the lower quarter after it,
+// Redmine's tooltip is plain CSS, so it cannot follow the pointer. The line records where the pointer is
+// and the stylesheet puts the tooltip just to the right of and below it (to the left near the screen's edge).
+placeTip(event) {
+  const tooltipWidth = 270
+  const line = event.currentTarget
+  const box = line.getBoundingClientRect()
+  let left = event.clientX - box.left + 16
+  if (event.clientX + 16 + tooltipWidth > window.innerWidth) left = event.clientX - box.left - 16 - tooltipWidth
+  line.style.setProperty("--tip-left", `${left}px`)
+  line.style.setProperty("--tip-top", `${event.clientY - box.top + 14}px`)
+}
+
+// Dragging: the upper quarter of a line puts the dragged line before it, the lower quarter after it,
   // the middle makes it a child.
   dragStart(event) {
     this.draggedTicketId = this.ticketIdOf(event.currentTarget)

@@ -4,7 +4,7 @@
     <%= tag.li class: ["todo-line", { "todo-line-closed": ticket.closed? }],
                data: { ticket_id: ticket.id, parent_id: ticket.parent_id } do %>
       <%= tag.div class: "todo-line-text tooltip hascontextmenu", draggable: "true",
-                  data: { action: "dragstart->todo#dragStart dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop dragend->todo#dragEnd" } do %>
+                  data: { action: "dragstart->todo#dragStart dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop dragend->todo#dragEnd mousemove->todo#placeTip" } do %>
         <% if nested_tickets.any? %>
           <button type="button" class="todo-fold" title="<%= l(:label_todo_fold_line) %>" aria-expanded="true"
                   data-action="click->todo#keepClick click->todo#toggleFold"></button>
