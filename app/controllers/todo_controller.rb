@@ -3,6 +3,7 @@ class TodoController < ApplicationController
   before_action :find_ticket, only: %i[update close reopen move]
 
   helper :issues
+  helper :todo
 
   def index
     @show_closed = params[:show_closed] == "1"

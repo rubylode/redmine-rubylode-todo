@@ -4,13 +4,54 @@ import { application } from "controllers/application"
 // The to-do list: every change is one request to the plugin, then the list is fetched again,
 // so what is on the page is always what the server stored.
 class TodoController extends Controller {
-  static targets = ["list", "message", "newLine"]
-  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, composerPlaceholder: String, tooManyLines: String, failure: String }
+  static targets = ["list", "message", "newLine", "shortcuts", "live"]
+  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, composerPlaceholder: String, tooManyLines: String, failure: String,
+    editKeys: String, composerKeys: String, nestUnder: String, announcements: Object }
 
   connect() {
     this.closedThisVisit = new Set()
     this.foldedIds = this.loadFoldedIds()
     this.applyFolds()
+    this.restoreFullText()
+    this.questionMarkHandler = (event) => this.openShortcutsOnQuestionMark(event)
+    document.addEventListener("keydown", this.questionMarkHandler)
+  }
+
+  disconnect() {
+    document.removeEventListener("keydown", this.questionMarkHandler)
+  }
+
+  // The shortcut list opens from its link, or with ? when the focus is not in a field.
+  showShortcuts(event) {
+    event?.preventDefault()
+    if (this.hasShortcutsTarget && !this.shortcutsTarget.open) this.shortcutsTarget.showModal()
+  }
+
+  openShortcutsOnQuestionMark(event) {
+    if (event.key !== "?" || event.metaKey || event.ctrlKey || event.altKey) return
+    if (event.target.closest("input, textarea, select, [contenteditable]")) return
+    this.showShortcuts(event)
+  }
+
+  // Subjects are cut at two lines; this shows them whole. A per-browser convenience, like folding.
+  toggleFullText(event) {
+    event.preventDefault()
+    const full = this.element.classList.toggle("is-full")
+    event.currentTarget.setAttribute("aria-pressed", String(full))
+    try { window.localStorage.setItem(`redmine_todo.full.${this.linesPathValue}`, full ? "1" : "0") } catch (error) { /* per visit only */ }
+  }
+
+  restoreFullText() {
+    let full = false
+    try { full = window.localStorage.getItem(`redmine_todo.full.${this.linesPathValue}`) === "1" } catch (error) { /* default */ }
+    this.element.classList.toggle("is-full", full)
+    this.element.querySelector("[data-action*='todo#toggleFullText']")?.setAttribute("aria-pressed", String(full))
+  }
+
+  // Tells screen readers what a change did; the list itself is drawn again without any announcement.
+  announce(kind, ticketId) {
+    const template = this.announcementsValue[kind]
+    if (template && this.hasLiveTarget) this.liveTarget.textContent = template.replace("%{id}", ticketId)
   }
 
   // Folding is a per-browser convenience, so it lives in localStorage, which may be unavailable.
@@ -84,6 +125,7 @@ class TodoController extends Controller {
     if (subject === "") return
 
     if (await this.send("POST", this.linesPathValue, { subject })) {
+      this.announce("created", this.lastBody.id)
       this.newLineTarget.value = ""
       await this.refresh()
     }
@@ -106,12 +148,18 @@ class TodoController extends Controller {
   //   Alt+Right / Alt+Left    nest it under the line above, or move it back out
   //   Escape           cancel
   startEdit(subjectElement) {
-    const original = subjectElement.textContent
+    const original = subjectElement.dataset.subject
     const input = document.createElement("input")
     input.type = "text"
     input.className = "todo-subject-input"
     input.value = original
-    subjectElement.replaceWith(input)
+    const hint = document.createElement("div")
+    hint.className = "todo-hint"
+    hint.textContent = this.editKeysValue
+    const editor = document.createElement("div")
+    editor.className = "todo-editor"
+    editor.append(input, hint)
+    subjectElement.replaceWith(editor)
     input.focus()
 
     const line = input.closest("li")
@@ -127,19 +175,19 @@ class TodoController extends Controller {
       let changed = false
       const subject = input.value.trim()
       if (save && subject !== "" && subject !== original) {
-        if (!(await this.send("PATCH", this.linePath(ticketId), { subject }))) return input.replaceWith(subjectElement)
+        if (!(await this.send("PATCH", this.linePath(ticketId), { subject }))) return editor.replaceWith(subjectElement)
         changed = true
       }
       if (moveParams) {
         if (!(await this.send("PATCH", `${this.linePath(ticketId)}/move`, moveParams))) {
-          return changed ? this.refresh() : input.replaceWith(subjectElement)
+          return changed ? this.refresh() : editor.replaceWith(subjectElement)
         }
         changed = true
       }
       if (changed) {
         await this.refresh()
       } else {
-        input.replaceWith(subjectElement)
+        editor.replaceWith(subjectElement)
       }
 
       if (next.addBelow) this.openComposerAfter(this.listTarget.querySelector(`li[data-ticket-id="${ticketId}"]`))
@@ -235,8 +283,11 @@ class TodoController extends Controller {
     input.type = "text"
     input.className = "todo-composer-input"
     input.placeholder = this.composerPlaceholderValue
-    composer.append(input)
+    const hint = document.createElement("div")
+    hint.className = "todo-hint"
+    composer.append(input, hint)
     list.insertBefore(composer, beforeNode)
+    this.updateComposerHint(composer)
     this.listTarget.querySelectorAll("ul.todo-nested-list:empty").forEach((emptyList) => emptyList.remove())
     input.focus()
 
@@ -264,6 +315,12 @@ class TodoController extends Controller {
       if (this.movingComposer || composer.dataset.submitting || !composer.isConnected) return
       input.value.trim() === "" ? this.closeComposer() : this.submitComposer(composer, input, { keepGoing: false })
     })
+  }
+
+  updateComposerHint(composer) {
+    const above = composer.previousElementSibling?.dataset?.ticketId
+    const nest = above ? `${this.nestUnderValue.replace("%{id}", above)} · ` : ""
+    composer.querySelector(".todo-hint").textContent = this.composerKeysValue.replace("%{nest}", nest)
   }
 
   // Up or Down from an empty new line: close it and edit the line above or below it.
@@ -352,6 +409,7 @@ class TodoController extends Controller {
     this.saveFoldedIds()
     this.applyFolds()
     this.moveComposer(composer, input, () => this.nestedListOf(above).append(composer))
+    this.updateComposerHint(composer)
   }
 
   outdentComposer(composer, input) {
@@ -360,6 +418,7 @@ class TodoController extends Controller {
     const emptiedList = composer.parentElement
     this.moveComposer(composer, input, () => parentLine.after(composer))
     if (emptiedList.children.length === 0) emptiedList.remove()
+    this.updateComposerHint(composer)
   }
 
   async submitComposer(composer, input, { keepGoing = true } = {}) {
@@ -377,6 +436,7 @@ class TodoController extends Controller {
       return input.focus()
     }
     const createdId = this.lastBody.id
+    this.announce("created", createdId)
     await this.refresh()
     if (keepGoing) this.openComposerAfter(this.listTarget.querySelector(`li[data-ticket-id="${createdId}"]`))
   }
@@ -416,6 +476,7 @@ class TodoController extends Controller {
 
   async finishToggle(checkbox, succeeded, closedIds = []) {
     if (succeeded) {
+      this.announce(checkbox.checked ? "closed" : "reopened", this.ticketIdOf(checkbox))
       closedIds.forEach((ticketId) => this.closedThisVisit.add(ticketId))
       await this.refresh()
     } else {
@@ -424,24 +485,27 @@ class TodoController extends Controller {
     }
   }
 
-// Redmine's tooltip is plain CSS, so it cannot follow the pointer. The line records where the pointer is
-// and the stylesheet puts the tooltip just to the right of and below it (to the left near the screen's edge).
-placeTip(event) {
-  const tooltipWidth = 270
-  const line = event.currentTarget
-  const box = line.getBoundingClientRect()
-  let left = event.clientX - box.left + 16
-  if (event.clientX + 16 + tooltipWidth > window.innerWidth) left = event.clientX - box.left - 16 - tooltipWidth
-  line.style.setProperty("--tip-left", `${left}px`)
-  line.style.setProperty("--tip-top", `${event.clientY - box.top + 14}px`)
-}
+  // Redmine's tooltip is plain CSS, so it cannot follow the pointer. The line records where the pointer is
+  // and the stylesheet puts the tooltip just to the right of and below it (to the left near the screen's edge).
+  placeTip(event) {
+    const tooltipWidth = 270
+    const line = event.currentTarget
+    const box = line.getBoundingClientRect()
+    let left = event.clientX - box.left + 16
+    if (event.clientX + 16 + tooltipWidth > window.innerWidth) left = event.clientX - box.left - 16 - tooltipWidth
+    line.style.setProperty("--tip-left", `${left}px`)
+    line.style.setProperty("--tip-top", `${event.clientY - box.top + 14}px`)
+  }
 
-// Dragging: the upper quarter of a line puts the dragged line before it, the lower quarter after it,
-  // the middle makes it a child.
+  // Dragging starts from the grip. The upper quarter of a line puts the dragged line before it, the lower
+  // quarter after it, the middle makes it a child.
   dragStart(event) {
     this.draggedTicketId = this.ticketIdOf(event.currentTarget)
     event.dataTransfer.effectAllowed = "move"
     event.dataTransfer.setData("text/plain", this.draggedTicketId)
+    const row = event.currentTarget.closest(".todo-line-text")
+    event.dataTransfer.setDragImage(row, 16, 12)
+    row.classList.add("todo-dragging")
   }
 
   dragOver(event) {
@@ -457,6 +521,7 @@ placeTip(event) {
 
   dragEnd() {
     this.clearDropMarks()
+    this.listTarget.querySelectorAll(".todo-dragging").forEach((row) => row.classList.remove("todo-dragging"))
   }
 
   async drop(event) {
@@ -478,6 +543,7 @@ placeTip(event) {
 
     const path = `${this.linePath(this.draggedTicketId)}/move`
     if (await this.send("PATCH", path, { parent_id: parentId || "", before_id: beforeId })) {
+      this.announce("moved", this.draggedTicketId)
       await this.refresh()
     }
   }

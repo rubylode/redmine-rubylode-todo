@@ -1,29 +1,41 @@
 <%= tag.ul class: ["todo-list", { "todo-nested-list": !top_level }] do %>
   <% tickets.each do |ticket| %>
     <% nested_tickets = todo_tree.children_of(ticket) %>
-    <%= tag.li class: ["todo-line", { "todo-line-closed": ticket.closed? }],
+    <% counts = nested_tickets.any? ? todo_tree.descendant_counts_for(ticket) : nil %>
+    <%= tag.li class: ["todo-line", { "todo-line-closed": ticket.closed?, "todo-parent": counts.present? }],
                data: { ticket_id: ticket.id, parent_id: ticket.parent_id } do %>
-      <%# Redmine's context menu script ticks and unticks every checkbox inside an element marked hascontextmenu, so
-          the fold arrow and the close checkbox stay outside it, next to the part that can be selected. %>
-      <%= tag.div class: "todo-line-text tooltip", draggable: "true",
-                  data: { action: "dragstart->todo#dragStart dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop dragend->todo#dragEnd mousemove->todo#placeTip" } do %>
-        <% if nested_tickets.any? %>
-          <button type="button" class="todo-fold" title="<%= l(:label_todo_fold_line) %>" aria-expanded="true"
+      <%# A line is a row of cells: grip, fold arrow, checkbox, then the body. Redmine's context menu script ticks and
+          unticks every checkbox inside an element marked hascontextmenu, so only the body carries that mark. %>
+      <%= tag.div class: "todo-line-text tooltip",
+                  data: { action: "dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop mousemove->todo#placeTip" } do %>
+        <span class="todo-grip" draggable="true" title="<%= l(:label_todo_drag) %>" aria-hidden="true"
+              data-action="dragstart->todo#dragStart dragend->todo#dragEnd">&#8942;&#8942;</span>
+        <% if counts %>
+          <button type="button" class="todo-fold" aria-expanded="true" title="<%= l(:label_todo_fold_line) %>"
+                  aria-label="<%= l(:label_todo_fold_label, id: ticket.id, count: counts.open + counts.closed) %>"
                   data-action="click->todo#keepClick click->todo#toggleFold"></button>
         <% else %>
           <span class="todo-fold-spacer"></span>
         <% end %>
         <%= check_box_tag nil, "1", ticket.closed?, id: nil, class: "todo-checkbox",
+                          "aria-label": l(ticket.closed? ? :label_todo_reopen_ticket : :label_todo_close_ticket, id: ticket.id),
                           data: { action: "click->todo#keepClick change->todo#toggle" } %>
         <div class="todo-line-body hascontextmenu">
           <%= check_box_tag "ids[]", ticket.id, false, id: nil, class: "todo-context-menu-selection" %>
-          <span class="todo-subject" data-action="click->todo#keepClick click->todo#edit"><%= ticket.subject %></span>
-          <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
-          <% if nested_tickets.any? && (counts = todo_tree.descendant_counts_for(ticket)) %>
-            <span class="todo-counts"><%= l(:text_todo_counts, open: counts.open, closed: counts.closed) %></span>
-          <% end %>
-          <button type="button" class="todo-add-child" title="<%= l(:label_todo_add_child) %>"
-                  data-action="click->todo#keepClick click->todo#addChild">+</button>
+          <%= tag.span todo_subject_html(ticket.subject), class: "todo-subject",
+                       data: { subject: ticket.subject, action: "click->todo#keepClick click->todo#edit" } %>
+          <span class="todo-line-meta">
+            <% if counts %>
+              <span class="todo-counts" title="<%= l(:text_todo_counts, open: counts.open, closed: counts.closed) %>">
+                <%= l(:text_todo_progress, closed: counts.closed, total: counts.open + counts.closed) %>
+                <progress class="todo-progress" max="<%= counts.open + counts.closed %>" value="<%= counts.closed %>" aria-hidden="true"></progress>
+              </span>
+            <% end %>
+            <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
+            <button type="button" class="todo-add-child" title="<%= l(:label_todo_add_child) %>"
+                    aria-label="<%= l(:label_todo_add_child) %>"
+                    data-action="click->todo#keepClick click->todo#addChild">+</button>
+          </span>
         </div>
         <span class="tip"><%= render_issue_tooltip ticket %></span>
       <% end %>

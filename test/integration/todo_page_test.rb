@@ -61,8 +61,9 @@ class TodoPageTest < Redmine::IntegrationTest
     Issue.generate!(project_id: @project.id, subject: "Old booking", parent_issue_id: @parent.id, status_id: 5)
     log_user("jsmith", "jsmith")
     get "/projects/ecookbook/todo"
-    assert_select "li[data-ticket-id='#{@parent.id}'] > div .todo-counts", text: "2 open, 1 closed"
-    assert_select "li[data-ticket-id='#{@child.id}'] > div .todo-counts", text: "1 open, 0 closed"
+    assert_select "li[data-ticket-id='#{@parent.id}'] > div .todo-counts[title='2 open, 1 closed']", text: /1 of 3/
+    assert_select "li[data-ticket-id='#{@parent.id}'] > div progress.todo-progress[max='3'][value='1']"
+    assert_select "li[data-ticket-id='#{@child.id}'] > div .todo-counts[title='1 open, 0 closed']", text: /0 of 1/
     assert_select "li[data-ticket-id='#{grandchild.id}'] .todo-counts", count: 0
     assert_select "li[data-ticket-id='#{@sibling.id}'] .todo-counts", count: 0
   end
@@ -75,6 +76,29 @@ class TodoPageTest < Redmine::IntegrationTest
     assert_select ".hascontextmenu .todo-fold", count: 0
     assert_select ".hascontextmenu input[type=checkbox]", count: 4 # only the hidden selection box of each line
     assert_select "li[data-ticket-id='#{@closed.id}'] .todo-checkbox[checked]", count: 1
+  end
+
+  test "a subject shows its markup and the part after the first dash lighter, and keeps the raw text for editing" do
+    Issue.generate!(project_id: @project.id, subject: "Fix `usb` task — **do** it, ~~not~~ later — and <b>more</b>")
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    subject = css_select(".todo-subject").find { |element| element["data-subject"].to_s.start_with?("Fix `usb`") }
+    assert_equal "Fix `usb` task — **do** it, ~~not~~ later — and <b>more</b>", subject["data-subject"]
+    assert_equal ["usb"], subject.css("code").map(&:text)
+    assert_equal ["do"], subject.css(".todo-tail strong").map(&:text)
+    assert_equal ["not"], subject.css(".todo-tail s").map(&:text)
+    assert_equal 0, subject.css("b").size # the markup in the subject is shown, never run
+  end
+
+  test "every line has a grip to drag it by and labelled controls" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    assert_select "li[data-ticket-id='#{@sibling.id}'] .todo-grip[draggable='true']"
+    assert_select "li[data-ticket-id='#{@sibling.id}'] .todo-line-text[draggable]", count: 0
+    assert_select "li[data-ticket-id='#{@sibling.id}'] .todo-checkbox[aria-label='Close ##{@sibling.id}']"
+    assert_select "li[data-ticket-id='#{@parent.id}'] .todo-fold[aria-label^='Lines below ##{@parent.id}']"
+    assert_select "[role=status][aria-live=polite]"
+    assert_select "dialog.todo-shortcuts"
   end
 
   test "a member without the permission is refused" do

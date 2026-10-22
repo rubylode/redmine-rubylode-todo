@@ -11,11 +11,34 @@ en:
   label_todo_collapse_all: Collapse all
   label_todo_expand_all: Expand all
   label_todo_fold_line: Fold or unfold the lines below
-  label_todo_new_line: Add a line and press Enter
+  label_todo_new_line: Add a to-do, or paste several lines to add one per line
   text_todo_confirm_close_subtree: "Closing this also closes %{count} open ticket(s) below it. Continue?"
   text_todo_confirm_reopen_subtree: "Reopening this also reopens %{count} closed ticket(s) below it. Continue?"
   text_todo_counts: "%{open} open, %{closed} closed"
+  text_todo_progress: "%{closed} of %{total}"
   label_todo_add_child: Add a line below this one
-  text_todo_composer_hint: "New line: Enter adds another, Tab nests it, Esc stops"
+  text_todo_composer_hint: Add a to-do, or paste several lines to add one per line
   text_todo_too_many_lines: "Paste at most %{count} lines at a time."
   text_todo_request_failed: The change could not be saved. Reload the page and try again.
+  label_todo_drag: Drag to move
+  label_todo_fold_label: "Lines below #%{id} (%{count})"
+  label_todo_close_ticket: "Close #%{id}"
+  label_todo_reopen_ticket: "Reopen #%{id}"
+  label_todo_nest_under: "Tab nest under #%{id}"
+  label_todo_shortcuts: Shortcuts
+  label_todo_full_text: Full text
+  text_todo_edit_keys: "Enter save, next line · ⌘Enter close · ↑↓ between lines · ⌥↑↓ move · ⌥→ nest, ⌥← outdent · Esc cancel"
+  text_todo_composer_keys: "Enter next line · %{nest}⇧Tab outdent · Esc stop · paste several lines to add one per line"
+  text_todo_announce_closed: "Closed #%{id}"
+  text_todo_announce_reopened: "Reopened #%{id}"
+  text_todo_announce_moved: "Moved #%{id}"
+  text_todo_announce_created: "Added #%{id}"
+  text_todo_key_enter: Save the line and start the next one below it.
+  text_todo_key_tab: In a new line, nest it under the line above, or move it back out.
+  text_todo_key_escape: Cancel an edit, or stop adding lines.
+  text_todo_key_up_down: While editing, go to the line above or below.
+  text_todo_key_alt_up_down: While editing, move the line up or down among its siblings.
+  text_todo_key_alt_left_right: While editing, nest the line under the one above, or move it back out.
+  text_todo_key_cmd_enter: While editing, close or reopen the line.
+  text_todo_key_paste: Paste several lines to add one per line. Indent two spaces to nest.
+  text_todo_key_question: Open this list when no field has the focus.

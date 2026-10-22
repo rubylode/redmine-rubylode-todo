@@ -13,7 +13,10 @@ and anything bigger is one click away from the normal ticket edit.
 - Edit in place, with notes-app keys: Up and Down between lines, Alt+arrows to move or nest, Cmd+Enter to tick.
 - A checkbox closes and reopens tickets. Closing a parent closes what is below it, after one confirmation.
 - Drag a line onto another to nest it, or between lines to reorder. The order is shared by everyone on the project.
-- Fold and unfold lines, with open and closed counts on every parent.
+- Fold and unfold lines. Every parent shows how many of the tickets below it are closed, with a small progress bar.
+- Long subjects stop at two lines (Full text shows them whole), `code`, **bold** and ~~strike~~ show as such, and the detail
+  after the first dash is lighter, so the headlines scan. Lines are dragged by a grip, so selecting text never drags.
+- Key hints appear under a line while you edit or add one, and a Shortcuts list (or ?) shows them all.
 - Redmine's own ticket tooltip on hover and its own context menu on right click (status, priority, assignee, edit, delete).
 - Everything goes through the normal ticket save, so workflow, permissions, journals and notification mails stay Redmine's.
 - No settings page, no extra gem, no JavaScript library. Redmine 7 and up. GPL v2 or later.

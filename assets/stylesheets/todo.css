@@ -1,24 +1,90 @@
+/* Colours are derived from the text colour, so a dark Redmine theme needs no extra rules. */
+.todo {
+  --todo-muted: color-mix(in srgb, currentColor 62%, transparent);
+  --todo-soft: color-mix(in srgb, currentColor 80%, transparent);
+  --todo-rule: color-mix(in srgb, currentColor 14%, transparent);
+  --todo-hover: color-mix(in srgb, currentColor 5%, transparent);
+  --todo-accent: var(--oc-blue-9, #169);
+  --todo-progress: #4f8f4f;
+}
+
 .todo ul.todo-list { list-style: none; margin: 0; padding: 0; }
-.todo ul.todo-nested-list { margin-left: 28px; }
+.todo ul.todo-nested-list { margin-left: 36px; border-left: 1px solid var(--todo-rule); }
 .todo li.todo-line { padding: 0; }
-.todo .todo-line-text { padding: 4px 6px; border-radius: 4px; border-top: 2px solid transparent; border-bottom: 2px solid transparent; }
-.todo .todo-line-text:hover { background: rgba(127, 127, 127, 0.1); }
-.todo .todo-line-text.todo-drop-before { border-top-color: #628db6; }
-.todo .todo-line-text.todo-drop-after { border-bottom-color: #628db6; }
-.todo .todo-line-text.todo-drop-child { background: rgba(98, 141, 182, 0.25); }
+
+/* A line is a row of cells: grip, fold arrow, checkbox, then the body (subject on the left, details on the right). */
+.todo .todo-line-text {
+  display: grid; grid-template-columns: 16px 26px 22px minmax(0, 1fr); column-gap: 4px; align-items: start;
+  padding: 4px 6px 4px 2px; border-radius: 4px;
+  border-top: 2px solid transparent; border-bottom: 2px solid transparent;
+  overflow-wrap: anywhere;
+}
+.todo .todo-line-text:hover { background: var(--todo-hover); }
+.todo .todo-line-text:has(:focus-visible) { outline: 2px solid var(--todo-accent); outline-offset: -2px; }
+
+.todo .todo-grip { height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: -2px; color: var(--todo-muted); cursor: grab; opacity: 0; }
+.todo .todo-line-text:hover .todo-grip, .todo .todo-grip:focus { opacity: 1; }
+.todo .todo-dragging { opacity: 0.45; }
+
+.todo .todo-fold, .todo .todo-fold-spacer { width: 26px; height: 22px; }
+.todo .todo-fold { display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; padding: 0; cursor: pointer; font-size: 1.5em; line-height: 1; color: inherit; }
+.todo .todo-fold::before { content: "\25BE"; }
+.todo li.todo-folded > .todo-line-text .todo-fold::before { content: "\25B8"; }
+.todo li.todo-folded > ul.todo-nested-list { display: none; }
+
+.todo .todo-checkbox { width: 16px; height: 16px; margin: 3px 0 0; cursor: pointer; accent-color: var(--todo-accent); }
 .todo .todo-context-menu-selection { display: none; }
-.todo .todo-checkbox { margin-right: 6px; vertical-align: middle; }
-.todo .todo-subject { cursor: text; }
-.todo .todo-subject-input { width: 60%; }
-.todo li.todo-line-closed > .todo-line-text .todo-subject { text-decoration: line-through; opacity: 0.6; }
-.todo .todo-ticket-link { margin-left: 8px; font-size: 0.85em; opacity: 0.6; }
-.todo .todo-new-line { width: 60%; margin-top: 8px; }
+
+/* The part Redmine's context menu script can select. */
+.todo .todo-line-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; align-items: start; min-width: 0; padding: 0 6px; border-radius: 3px; }
+.todo .todo-line-body.context-menu-selection { background: color-mix(in srgb, var(--todo-accent) 14%, transparent); color: inherit; }
+.todo .todo-line-body.context-menu-selection a { color: var(--todo-accent) !important; }
+
+/* Subjects stop at two lines, the detail after the first dash is lighter, and `code`, **bold** and ~~strike~~ show as such. */
+.todo .todo-subject {
+  min-width: 0; cursor: text; line-height: 22px; text-wrap: pretty;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.todo.is-full .todo-subject { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.todo .todo-tail { color: var(--todo-soft); font-weight: 400; }
+.todo li.todo-parent > .todo-line-text .todo-subject { font-weight: 600; }
+.todo .todo-subject code { font-family: SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; background: var(--todo-rule); border-radius: 3px; padding: 0 3px; }
+.todo li.todo-line-closed > .todo-line-text .todo-subject { text-decoration: line-through; text-decoration-color: var(--todo-muted); color: var(--todo-muted); }
+.todo li.todo-line-closed > .todo-line-text .todo-subject .todo-tail, .todo li.todo-line-closed > .todo-line-text .todo-subject code { color: inherit; }
+
+/* The right-hand column: progress, ticket number, add button. It keeps its place on every line. */
+.todo .todo-line-meta { display: flex; align-items: center; gap: 8px; height: 22px; font-size: 12px; color: var(--todo-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.todo .todo-counts { display: inline-flex; align-items: center; gap: 6px; }
+.todo progress.todo-progress { appearance: none; -webkit-appearance: none; width: 40px; height: 4px; border: 0; border-radius: 2px; background: var(--todo-rule); overflow: hidden; }
+.todo progress.todo-progress::-webkit-progress-bar { background: var(--todo-rule); }
+.todo progress.todo-progress::-webkit-progress-value { background: var(--todo-progress); }
+.todo progress.todo-progress::-moz-progress-bar { background: var(--todo-progress); }
+.todo .todo-ticket-link { color: var(--todo-accent); }
+.todo .todo-add-child { width: 24px; height: 22px; border: 0; border-radius: 3px; background: none; cursor: pointer; font-size: 1.3em; line-height: 1; color: inherit; opacity: 0; }
+.todo .todo-line-text:hover .todo-add-child, .todo .todo-add-child:focus { opacity: 0.8; }
+.todo .todo-add-child:hover { background: var(--todo-rule); }
+
+/* Dropping: a line where the dragged line will land, or a tint when it becomes a child. */
+.todo .todo-line-text.todo-drop-before { border-top-color: var(--todo-accent); }
+.todo .todo-line-text.todo-drop-after { border-bottom-color: var(--todo-accent); }
+.todo .todo-line-text.todo-drop-child { background: color-mix(in srgb, var(--todo-accent) 18%, transparent); }
+
+/* Editing, and the inline new line, each with a row of key hints underneath. */
+.todo .todo-editor, .todo li.todo-composer { min-width: 0; }
+.todo .todo-subject-input, .todo .todo-composer-input { width: 100%; box-sizing: border-box; box-shadow: inset 0 0 0 1px var(--todo-accent); }
+.todo li.todo-composer { padding: 2px 0 2px 46px; }
+.todo .todo-hint { font-size: 12px; color: var(--todo-muted); padding: 2px 0 4px; }
+.todo .todo-new-line { width: 100%; box-sizing: border-box; margin-top: 12px; }
 .todo .todo-message { margin: 8px 0; }
+.todo .todo-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* Long subjects wrap inside the page instead of running off its edge. */
-.todo .todo-line-text { overflow-wrap: anywhere; }
+/* The shortcut list. */
+.todo dialog.todo-shortcuts { max-width: 520px; border: 1px solid var(--todo-rule); border-radius: 6px; padding: 16px 20px; }
+.todo dialog.todo-shortcuts dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 8px 0 16px; }
+.todo dialog.todo-shortcuts dd { margin: 0; }
+.todo dialog.todo-shortcuts kbd { font: 11px/16px SFMono-Regular, Menlo, Consolas, monospace; border: 1px solid var(--todo-muted); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; }
 
-/* Redmine opens the tooltip at the line's left edge, over the checkboxes of the lines below.
+/* Redmine opens its tooltip at the line's left edge, over the checkboxes of the lines below.
    Here it opens just right of the pointer (placed by the controller), waits a moment, and never takes the pointer. */
 .todo div.tooltip span.tip {
   display: block; visibility: hidden; opacity: 0; pointer-events: none;
@@ -30,22 +96,18 @@
   transition: opacity 0.15s ease 0.3s, visibility 0s linear 0.3s;
 }
 
-/* Folding: an arrow on lines that have children; a folded line hides its nested list. */
-.todo .todo-fold, .todo .todo-fold-spacer { display: inline-block; width: 26px; margin-right: 2px; vertical-align: middle; }
-.todo .todo-fold { border: 0; background: none; padding: 0; cursor: pointer; font-size: 1.5em; line-height: 1; color: inherit; }
-.todo .todo-counts { margin-left: 10px; font-size: 0.8em; opacity: 0.7; white-space: nowrap; }
-.todo .todo-fold::before { content: "\25BE"; }
-.todo li.todo-folded > .todo-line-text .todo-fold::before { content: "\25B8"; }
-.todo li.todo-folded > ul.todo-nested-list { display: none; }
+/* Touch screens: bigger targets, no hover to reveal controls, no dragging, and 16px fields so iOS does not zoom. */
+@media (pointer: coarse) {
+  .todo .todo-grip { display: none; }
+  .todo .todo-line-text { grid-template-columns: 0 44px 30px minmax(0, 1fr); }
+  .todo .todo-fold, .todo .todo-fold-spacer { width: 44px; height: 44px; }
+  .todo .todo-checkbox { width: 24px; height: 24px; margin: 8px 0 0; }
+  .todo .todo-add-child { opacity: 0.6; min-width: 44px; min-height: 44px; }
+  .todo .todo-line-meta { height: 44px; }
+  .todo .todo-subject { line-height: 28px; padding-top: 8px; }
+  .todo .todo-new-line, .todo .todo-composer-input, .todo .todo-subject-input { font-size: 16px; }
+}
+@media (hover: none) { .todo .todo-add-child { opacity: 0.6; } }
 
-/* The inline new line, and the + that opens it under a line. */
-.todo li.todo-composer { padding: 2px 0 2px 28px; }
-.todo .todo-composer-input { width: 60%; }
-.todo .todo-add-child { border: 0; background: none; cursor: pointer; font-size: 1.4em; line-height: 1; color: inherit; margin-left: 6px; opacity: 0; vertical-align: middle; }
-.todo .todo-line-text:hover .todo-add-child, .todo .todo-add-child:focus { opacity: 0.8; }
-@media (hover: none) { .todo .todo-add-child { opacity: 0.4; } }
-
-/* The line is a row: arrow and checkbox, then the part Redmine's context menu can select, which takes the rest. */
-.todo .todo-line-text { display: flex; align-items: baseline; }
-.todo .todo-fold, .todo .todo-fold-spacer, .todo .todo-checkbox { flex: none; }
-.todo .todo-line-body { flex: 1 1 auto; min-width: 0; padding: 0 6px; border-radius: 3px; }
+/* The toolbar sits on its own row; floated, it squeezed the first line's right-hand column. */
+.todo > .contextual { float: none; text-align: right; margin: 0 0 8px; }

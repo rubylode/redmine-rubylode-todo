@@ -15,8 +15,17 @@
                     todo_confirm_reopen_subtree_value: l(:text_todo_confirm_reopen_subtree, count: "%{count}"),
                     todo_composer_placeholder_value: l(:text_todo_composer_hint),
                     todo_too_many_lines_value: l(:text_todo_too_many_lines, count: "%{count}"),
+                    todo_edit_keys_value: l(:text_todo_edit_keys),
+                    todo_composer_keys_value: l(:text_todo_composer_keys, nest: "%{nest}"),
+                    todo_nest_under_value: l(:label_todo_nest_under, id: "%{id}"),
+                    todo_announcements_value: { closed: l(:text_todo_announce_closed, id: "%{id}"),
+                                                reopened: l(:text_todo_announce_reopened, id: "%{id}"),
+                                                moved: l(:text_todo_announce_moved, id: "%{id}"),
+                                                created: l(:text_todo_announce_created, id: "%{id}") },
                     todo_failure_value: l(:text_todo_request_failed) } do %>
   <div class="contextual">
+    <a href="#" data-action="click->todo#showShortcuts"><%= l(:label_todo_shortcuts) %> ?</a> |
+    <a href="#" role="button" aria-pressed="false" data-action="click->todo#toggleFullText"><%= l(:label_todo_full_text) %></a> |
     <a href="#" data-action="click->todo#collapseAll"><%= l(:label_todo_collapse_all) %></a> |
     <a href="#" data-action="click->todo#expandAll"><%= l(:label_todo_expand_all) %></a> |
     <% if @show_closed %>
@@ -27,6 +36,7 @@
   </div>
 
   <p class="todo-message flash error" role="alert" hidden data-todo-target="message"></p>
+  <div class="todo-live" role="status" aria-live="polite" data-todo-target="live"></div>
 
   <%= form_tag({}, data: { cm_url: issues_context_menu_path }, onsubmit: "return false;") do %>
     <div data-todo-target="list">
@@ -37,4 +47,18 @@
   <input type="text" class="todo-new-line" autocomplete="off"
          placeholder="<%= l(:label_todo_new_line) %>"
          data-todo-target="newLine" data-action="keydown->todo#addLine paste->todo#pasteIntoNewLine">
+
+  <dialog class="todo-shortcuts" data-todo-target="shortcuts" aria-labelledby="todo-shortcuts-title">
+    <h3 id="todo-shortcuts-title"><%= l(:label_todo_shortcuts) %></h3>
+    <dl>
+      <% [["Enter", :text_todo_key_enter], ["Tab / Shift+Tab", :text_todo_key_tab], ["Esc", :text_todo_key_escape],
+          ["Up / Down", :text_todo_key_up_down], ["Alt+Up / Alt+Down", :text_todo_key_alt_up_down],
+          ["Alt+Right / Alt+Left", :text_todo_key_alt_left_right], ["Cmd+Enter / Ctrl+Enter", :text_todo_key_cmd_enter],
+          ["Paste", :text_todo_key_paste], ["?", :text_todo_key_question]].each do |keys, description| %>
+        <dt><kbd><%= keys %></kbd></dt>
+        <dd><%= l(description) %></dd>
+      <% end %>
+    </dl>
+    <form method="dialog"><button class="todo-shortcuts-close"><%= l(:button_close) %></button></form>
+  </dialog>
 <% end %>
