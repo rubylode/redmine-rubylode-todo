@@ -14,3 +14,18 @@
 .todo .todo-ticket-link { margin-left: 8px; font-size: 0.85em; opacity: 0.6; }
 .todo .todo-new-line { width: 60%; margin-top: 8px; }
 .todo .todo-message { margin: 8px 0; }
+
+/* Long subjects wrap inside the page instead of running off its edge. */
+.todo .todo-line-text { overflow-wrap: anywhere; }
+
+/* Redmine opens the tooltip at the line's left edge, over the checkboxes of the lines below.
+   Here it opens at the middle of the line, waits half a second, and never takes the pointer. */
+.todo div.tooltip span.tip {
+  display: block; visibility: hidden; opacity: 0; pointer-events: none;
+  position: absolute; inset-block-start: 100%; inset-inline-start: 50%;
+  transition: opacity 0.15s ease 0s, visibility 0s linear 0s;
+}
+.todo div.tooltip:hover span.tip {
+  visibility: visible; opacity: 1;
+  transition: opacity 0.15s ease 0.5s, visibility 0s linear 0.5s;
+}
