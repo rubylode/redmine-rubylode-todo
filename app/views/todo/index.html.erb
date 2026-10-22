@@ -13,6 +13,7 @@
                     todo_page_url_value: project_todo_path(@project, show_closed: (1 if @show_closed)),
                     todo_confirm_close_subtree_value: l(:text_todo_confirm_close_subtree, count: "%{count}"),
                     todo_confirm_reopen_subtree_value: l(:text_todo_confirm_reopen_subtree, count: "%{count}"),
+                    todo_composer_placeholder_value: l(:text_todo_composer_hint),
                     todo_failure_value: l(:text_todo_request_failed) } do %>
   <div class="contextual">
     <a href="#" data-action="click->todo#collapseAll"><%= l(:label_todo_collapse_all) %></a> |

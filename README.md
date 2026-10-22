@@ -10,7 +10,10 @@ and anything bigger is one click away from the normal ticket edit.
 
 - Lists a project's open tickets, children nested under their parent. A link shows closed ones crossed out.
 - Type a line at the bottom and press Enter to create a ticket (default tracker, status and priority, assigned to you).
-- Click a line's text to edit the subject. Enter saves, Escape cancels.
+- Click a line's text to edit the subject. Enter saves it and opens a new line right below, as in a notes app. Keep
+  pressing Enter to keep adding. In a new line, Tab nests it under the line above, Shift+Tab moves it back out,
+  Escape (or Backspace on an empty line) stops. A + on each line adds a child under it.
+- Escape cancels an edit.
 - The checkbox closes the ticket, or reopens it. A closed line stays in place, crossed out, until you reload the page.
   Closing a parent asks once before it closes the open tickets below it.
 - An arrow on a line with children folds it. Collapse all and Expand all are above the list. Folding is remembered per browser.

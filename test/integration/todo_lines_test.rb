@@ -66,4 +66,50 @@ class TodoLinesTest < Redmine::IntegrationTest
     assert_response :not_found
     assert_equal "Elsewhere", other.reload.subject
   end
+
+  def listed_ticket_ids
+    get "/projects/ecookbook/todo"
+    css_select("li.todo-line").map { |line| line["data-ticket-id"].to_i }
+  end
+
+  test "a line created with a parent becomes its child" do
+    parent = Issue.generate!(project_id: @project.id, subject: "Plan the trip")
+    post "/projects/ecookbook/todo/lines", params: { subject: "Book the train", parent_id: parent.id.to_s }
+    assert_response :created
+    assert_equal parent, Issue.find(response.parsed_body["id"]).parent
+  end
+
+  test "a line created in front of a sibling is listed before it" do
+    first = Issue.generate!(project_id: @project.id, subject: "First")
+    second = Issue.generate!(project_id: @project.id, subject: "Second")
+    post "/projects/ecookbook/todo/lines", params: { subject: "Between", before_id: second.id.to_s }
+    assert_response :created
+    created = response.parsed_body["id"]
+    assert_equal [first.id, created, second.id], listed_ticket_ids
+  end
+
+  test "a line created in front of a child of a parent is listed among that parent's children" do
+    parent = Issue.generate!(project_id: @project.id, subject: "Plan the trip")
+    child = Issue.generate!(project_id: @project.id, subject: "Book the train", parent_issue_id: parent.id)
+    post "/projects/ecookbook/todo/lines", params: { subject: "Pack", parent_id: parent.id.to_s, before_id: child.id.to_s }
+    created = response.parsed_body["id"]
+    assert_equal [parent.id, created, child.id], listed_ticket_ids
+  end
+
+  test "a person who may not manage subtasks cannot create a child line" do
+    Role.find(1).remove_permission!(:manage_subtasks)
+    parent = Issue.generate!(project_id: @project.id, subject: "Plan the trip")
+    assert_no_difference "Issue.count" do
+      post "/projects/ecookbook/todo/lines", params: { subject: "Book the train", parent_id: parent.id.to_s }
+    end
+    assert_response :unprocessable_content
+  end
+
+  test "a line cannot be created under a ticket of another project" do
+    other = Issue.generate!(project_id: 3, subject: "Elsewhere")
+    assert_no_difference "Issue.count" do
+      post "/projects/ecookbook/todo/lines", params: { subject: "Sneaky", parent_id: other.id.to_s }
+    end
+    assert_response :not_found
+  end
 end

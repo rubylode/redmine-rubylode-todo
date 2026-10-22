@@ -37,3 +37,10 @@
 .todo .todo-fold::before { content: "\25BE"; }
 .todo li.todo-folded > .todo-line-text .todo-fold::before { content: "\25B8"; }
 .todo li.todo-folded > ul.todo-nested-list { display: none; }
+
+/* The inline new line, and the + that opens it under a line. */
+.todo li.todo-composer { padding: 2px 0 2px 28px; }
+.todo .todo-composer-input { width: 60%; }
+.todo .todo-add-child { border: 0; background: none; cursor: pointer; font-size: 1.4em; line-height: 1; color: inherit; margin-left: 6px; opacity: 0; vertical-align: middle; }
+.todo .todo-line-text:hover .todo-add-child, .todo .todo-add-child:focus { opacity: 0.8; }
+@media (hover: none) { .todo .todo-add-child { opacity: 0.4; } }

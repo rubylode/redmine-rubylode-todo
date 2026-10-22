@@ -5,7 +5,7 @@ import { application } from "controllers/application"
 // so what is on the page is always what the server stored.
 class TodoController extends Controller {
   static targets = ["list", "message", "newLine"]
-  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, failure: String }
+  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, composerPlaceholder: String, failure: String }
 
   connect() {
     this.closedThisVisit = new Set()
@@ -93,25 +93,135 @@ class TodoController extends Controller {
     subjectElement.replaceWith(input)
     input.focus()
 
+    const ticketId = this.ticketIdOf(input)
     let finished = false
-    const finish = async (save) => {
+    // addBelow: Enter saves the line and opens a new one right under it, as in a notes app.
+    const finish = async (save, addBelow = false) => {
       if (finished) return
       finished = true
       const subject = input.value.trim()
+      let refreshed = false
       if (save && subject !== "" && subject !== original) {
-        if (await this.send("PATCH", this.linePath(this.ticketIdOf(input)), { subject })) {
+        if (await this.send("PATCH", this.linePath(ticketId), { subject })) {
           await this.refresh()
-          return
+          refreshed = true
         }
       }
-      input.replaceWith(subjectElement)
+      if (!refreshed) input.replaceWith(subjectElement)
+      if (addBelow) this.openComposerAfter(this.listTarget.querySelector(`li[data-ticket-id="${ticketId}"]`))
     }
     input.addEventListener("keydown", (keyEvent) => {
       if (keyEvent.isComposing) return
-      if (keyEvent.key === "Enter") finish(true)
+      if (keyEvent.key === "Enter") finish(true, true)
       if (keyEvent.key === "Escape") finish(false)
     })
     input.addEventListener("blur", () => finish(true))
+  }
+
+  // The composer is a new, empty line. Enter saves it and opens the next one below, Tab nests it under the
+  // line above, Shift+Tab moves it back out, Escape (or Enter on an empty line) stops. Where the composer sits
+  // in the list decides the new ticket's parent and place.
+  addChild(event) {
+    event.preventDefault()
+    const line = event.currentTarget.closest("li")
+    this.foldedIds.delete(line.dataset.ticketId)
+    this.saveFoldedIds()
+    this.applyFolds()
+    this.openComposer(this.nestedListOf(line), null)
+  }
+
+  openComposerAfter(line) {
+    if (line) this.openComposer(line.parentElement, line.nextElementSibling)
+  }
+
+  openComposer(list, beforeNode) {
+    this.closeComposer()
+    const composer = document.createElement("li")
+    composer.className = "todo-composer"
+    const input = document.createElement("input")
+    input.type = "text"
+    input.className = "todo-composer-input"
+    input.placeholder = this.composerPlaceholderValue
+    composer.append(input)
+    list.insertBefore(composer, beforeNode)
+    input.focus()
+
+    input.addEventListener("keydown", (keyEvent) => {
+      if (keyEvent.isComposing) return
+      if (keyEvent.key === "Enter") {
+        keyEvent.preventDefault()
+        this.submitComposer(composer, input)
+      } else if (keyEvent.key === "Escape" || (keyEvent.key === "Backspace" && input.value === "")) {
+        keyEvent.preventDefault()
+        this.closeComposer()
+      } else if (keyEvent.key === "Tab") {
+        keyEvent.preventDefault()
+        keyEvent.shiftKey ? this.outdentComposer(composer, input) : this.indentComposer(composer, input)
+      }
+    })
+    input.addEventListener("blur", () => {
+      if (this.movingComposer || composer.dataset.submitting || !composer.isConnected) return
+      input.value.trim() === "" ? this.closeComposer() : this.submitComposer(composer, input, { keepGoing: false })
+    })
+  }
+
+  closeComposer() {
+    this.listTarget.querySelector("li.todo-composer")?.remove()
+    this.listTarget.querySelectorAll("ul.todo-nested-list:empty").forEach((list) => list.remove())
+  }
+
+  nestedListOf(line) {
+    let list = line.querySelector(":scope > ul")
+    if (!list) {
+      list = document.createElement("ul")
+      list.className = "todo-list todo-nested-list"
+      line.append(list)
+    }
+    return list
+  }
+
+  // Moving the focused input in the page blurs it in some browsers; the flag keeps that from ending the composer.
+  moveComposer(composer, input, move) {
+    this.movingComposer = true
+    move()
+    input.focus()
+    this.movingComposer = false
+  }
+
+  indentComposer(composer, input) {
+    const above = composer.previousElementSibling
+    if (!above?.dataset.ticketId) return
+    this.foldedIds.delete(above.dataset.ticketId)
+    this.saveFoldedIds()
+    this.applyFolds()
+    this.moveComposer(composer, input, () => this.nestedListOf(above).append(composer))
+  }
+
+  outdentComposer(composer, input) {
+    const parentLine = composer.parentElement.closest("li[data-ticket-id]")
+    if (!parentLine) return
+    const emptiedList = composer.parentElement
+    this.moveComposer(composer, input, () => parentLine.after(composer))
+    if (emptiedList.children.length === 0) emptiedList.remove()
+  }
+
+  async submitComposer(composer, input, { keepGoing = true } = {}) {
+    const subject = input.value.trim()
+    if (subject === "") return this.closeComposer()
+
+    if (composer.dataset.submitting) return // Enter and the blur that follows it must not send the line twice
+
+    const parentLine = composer.parentElement.closest("li[data-ticket-id]")
+    const nextLine = composer.nextElementSibling
+    const params = { subject, parent_id: parentLine?.dataset.ticketId || "", before_id: nextLine?.dataset.ticketId || "" }
+    composer.dataset.submitting = "1"
+    if (!(await this.send("POST", this.linesPathValue, params))) {
+      delete composer.dataset.submitting
+      return input.focus()
+    }
+    const createdId = this.lastBody.id
+    await this.refresh()
+    if (keepGoing) this.openComposerAfter(this.listTarget.querySelector(`li[data-ticket-id="${createdId}"]`))
   }
 
   // Redmine's context menu script selects (and highlights) a row on any click inside it. Clicks on the

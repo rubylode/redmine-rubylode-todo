@@ -19,6 +19,8 @@
         <% if nested_tickets.any? && (counts = todo_tree.descendant_counts_for(ticket)) %>
           <span class="todo-counts"><%= l(:text_todo_counts, open: counts.open, closed: counts.closed) %></span>
         <% end %>
+        <button type="button" class="todo-add-child" title="<%= l(:label_todo_add_child) %>"
+                data-action="click->todo#keepClick click->todo#addChild">+</button>
         <span class="tip"><%= render_issue_tooltip ticket %></span>
       <% end %>
       <% if nested_tickets.any? %>

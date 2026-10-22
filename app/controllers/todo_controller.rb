@@ -29,11 +29,27 @@ class TodoController < ApplicationController
     ticket.status = ticket.tracker.default_status
     ticket.priority = IssuePriority.default || IssuePriority.active.first
     ticket.assigned_to = User.current if ticket.assignable_users.include?(User.current)
-    if ticket.save
-      render json: { id: ticket.id }, status: :created
-    else
-      render_failure(ticket.errors.full_messages.to_sentence)
+
+    parent = project_ticket_or_nil(params[:parent_id])
+    before = project_ticket_or_nil(params[:before_id])
+    return render_404 if (params[:parent_id].present? && parent.nil?) || (params[:before_id].present? && before.nil?)
+
+    if parent
+      return render_failure(l(:text_todo_no_subtask_right)) unless User.current.allowed_to?(:manage_subtasks, @project)
+
+      ticket.parent_issue_id = parent.id
     end
+
+    failure = nil
+    Issue.transaction do
+      if ticket.save
+        place_among_siblings(ticket, parent, before) if before
+      else
+        failure = ticket.errors.full_messages.to_sentence
+        raise ActiveRecord::Rollback
+      end
+    end
+    failure ? render_failure(failure) : render(json: { id: ticket.id }, status: :created)
   end
 
   def update
@@ -96,14 +112,19 @@ class TodoController < ApplicationController
       failure = change_parent(@ticket, parent)
       return render_failure(failure) if failure
 
-      siblings = TodoPosition.sort(Issue.visible.where(project_id: @project.id, parent_id: parent&.id).to_a) - [@ticket]
-      insert_at = before && siblings.index(before) || siblings.size
-      TodoPosition.place(siblings.insert(insert_at, @ticket))
+      place_among_siblings(@ticket, parent, before)
     end
     render json: { id: @ticket.id }
   end
 
   private
+
+  # Stores the ticket's place among the children of parent (top level when nil): in front of before, or last.
+  def place_among_siblings(ticket, parent, before)
+    siblings = TodoPosition.sort(Issue.visible.where(project_id: @project.id, parent_id: parent&.id).to_a) - [ticket]
+    insert_at = before && siblings.index(before) || siblings.size
+    TodoPosition.place(siblings.insert(insert_at, ticket))
+  end
 
   def descendant_counts
     rows = Issue.visible.where(project_id: @project.id).joins(:status).pluck(:id, :parent_id, "issue_statuses.is_closed")

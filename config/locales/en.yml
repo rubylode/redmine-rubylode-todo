@@ -15,4 +15,6 @@ en:
   text_todo_confirm_close_subtree: "Closing this also closes %{count} open ticket(s) below it. Continue?"
   text_todo_confirm_reopen_subtree: "Reopening this also reopens %{count} closed ticket(s) below it. Continue?"
   text_todo_counts: "%{open} open, %{closed} closed"
+  label_todo_add_child: Add a line below this one
+  text_todo_composer_hint: "New line: Enter adds another, Tab nests it, Esc stops"
   text_todo_request_failed: The change could not be saved. Reload the page and try again.
