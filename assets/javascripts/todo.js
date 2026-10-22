@@ -227,7 +227,8 @@ class TodoController extends Controller {
   }
 
   openComposer(list, beforeNode) {
-    this.closeComposer()
+    // Only the old composer goes. Clearing empty nested lists here would remove the one the caller just made.
+    this.listTarget.querySelector("li.todo-composer")?.remove()
     const composer = document.createElement("li")
     composer.className = "todo-composer"
     const input = document.createElement("input")
@@ -236,6 +237,7 @@ class TodoController extends Controller {
     input.placeholder = this.composerPlaceholderValue
     composer.append(input)
     list.insertBefore(composer, beforeNode)
+    this.listTarget.querySelectorAll("ul.todo-nested-list:empty").forEach((emptyList) => emptyList.remove())
     input.focus()
 
     input.addEventListener("keydown", (keyEvent) => {
