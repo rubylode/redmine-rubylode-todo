@@ -1,10 +1,16 @@
 <%= tag.ul class: ["todo-list", { "todo-nested-list": !top_level }] do %>
   <% tickets.each do |ticket| %>
-    <%= tag.li class: ["todo-line", { "todo-line-closed": ticket.closed? }], data: { ticket_id: ticket.id } do %>
-      <div class="todo-line-text tooltip">
-        <%= link_to ticket.subject, issue_path(ticket) %>
+    <%= tag.li class: ["todo-line", { "todo-line-closed": ticket.closed? }],
+               data: { ticket_id: ticket.id, parent_id: ticket.parent_id } do %>
+      <%= tag.div class: "todo-line-text tooltip hascontextmenu", draggable: "true",
+                  data: { action: "dragstart->todo#dragStart dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop dragend->todo#dragEnd" } do %>
+        <%= check_box_tag "ids[]", ticket.id, false, id: nil, class: "todo-context-menu-selection" %>
+        <%= check_box_tag nil, "1", ticket.closed?, id: nil, class: "todo-checkbox",
+                          data: { action: "change->todo#toggle" } %>
+        <span class="todo-subject" data-action="click->todo#edit"><%= ticket.subject %></span>
+        <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
         <span class="tip"><%= render_issue_tooltip ticket %></span>
-      </div>
+      <% end %>
       <% nested_tickets = todo_tree.children_of(ticket) %>
       <% if nested_tickets.any? %>
         <%= render "todo/lines", todo_tree: todo_tree, tickets: nested_tickets, top_level: false %>

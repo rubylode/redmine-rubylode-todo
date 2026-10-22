@@ -1,0 +1,5 @@
+<% if todo_tree.top_level_tickets.empty? %>
+  <p class="nodata"><%= l(:text_todo_empty) %></p>
+<% else %>
+  <%= render "todo/lines", todo_tree: todo_tree, tickets: todo_tree.top_level_tickets, top_level: true %>
+<% end %>

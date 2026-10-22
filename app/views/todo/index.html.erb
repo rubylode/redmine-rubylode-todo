@@ -1,7 +1,9 @@
 <% html_title l(:label_todo) %>
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag "todo", plugin: "redmine_todo" %>
+  <%= javascript_include_tag "todo", plugin: "redmine_todo", type: "module" %>
 <% end %>
+<%= context_menu %>
 
 <div class="contextual">
   <% if @show_closed %>
@@ -13,8 +15,21 @@
 
 <h2><%= l(:label_todo) %></h2>
 
-<% if @todo_tree.top_level_tickets.empty? %>
-  <p class="nodata"><%= l(:text_todo_empty) %></p>
-<% else %>
-  <%= render "todo/lines", todo_tree: @todo_tree, tickets: @todo_tree.top_level_tickets, top_level: true %>
+<%= tag.div class: "todo",
+            data: { controller: "todo",
+                    todo_lines_path_value: project_todo_lines_path(@project),
+                    todo_page_url_value: project_todo_path(@project, show_closed: (1 if @show_closed)),
+                    todo_confirm_close_subtree_value: l(:text_todo_confirm_close_subtree, count: "%{count}"),
+                    todo_failure_value: l(:text_todo_request_failed) } do %>
+  <p class="todo-message flash error" role="alert" hidden data-todo-target="message"></p>
+
+  <%= form_tag({}, data: { cm_url: issues_context_menu_path }, onsubmit: "return false;") do %>
+    <div data-todo-target="list">
+      <%= render "todo/list", todo_tree: @todo_tree %>
+    </div>
+  <% end %>
+
+  <input type="text" class="todo-new-line" autocomplete="off"
+         placeholder="<%= l(:label_todo_new_line) %>"
+         data-todo-target="newLine" data-action="keydown->todo#addLine">
 <% end %>

@@ -1,4 +1,16 @@
-ul.todo-list { list-style: none; margin: 0; padding: 0; }
-ul.todo-list ul.todo-nested-list { margin-left: 24px; }
-li.todo-line { padding: 3px 0; }
-li.todo-line-closed > .todo-line-text a { text-decoration: line-through; opacity: 0.6; }
+.todo ul.todo-list { list-style: none; margin: 0; padding: 0; }
+.todo ul.todo-nested-list { margin-left: 28px; }
+.todo li.todo-line { padding: 0; }
+.todo .todo-line-text { padding: 4px 6px; border-radius: 4px; border-top: 2px solid transparent; border-bottom: 2px solid transparent; }
+.todo .todo-line-text:hover { background: rgba(127, 127, 127, 0.1); }
+.todo .todo-line-text.todo-drop-before { border-top-color: #628db6; }
+.todo .todo-line-text.todo-drop-after { border-bottom-color: #628db6; }
+.todo .todo-line-text.todo-drop-child { background: rgba(98, 141, 182, 0.25); }
+.todo .todo-context-menu-selection { display: none; }
+.todo .todo-checkbox { margin-right: 6px; vertical-align: middle; }
+.todo .todo-subject { cursor: text; }
+.todo .todo-subject-input { width: 60%; }
+.todo li.todo-line-closed > .todo-line-text .todo-subject { text-decoration: line-through; opacity: 0.6; }
+.todo .todo-ticket-link { margin-left: 8px; font-size: 0.85em; opacity: 0.6; }
+.todo .todo-new-line { width: 60%; margin-top: 8px; }
+.todo .todo-message { margin: 8px 0; }
