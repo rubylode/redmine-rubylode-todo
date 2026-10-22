@@ -3,7 +3,9 @@
     <% nested_tickets = todo_tree.children_of(ticket) %>
     <%= tag.li class: ["todo-line", { "todo-line-closed": ticket.closed? }],
                data: { ticket_id: ticket.id, parent_id: ticket.parent_id } do %>
-      <%= tag.div class: "todo-line-text tooltip hascontextmenu", draggable: "true",
+      <%# Redmine's context menu script ticks and unticks every checkbox inside an element marked hascontextmenu, so
+          the fold arrow and the close checkbox stay outside it, next to the part that can be selected. %>
+      <%= tag.div class: "todo-line-text tooltip", draggable: "true",
                   data: { action: "dragstart->todo#dragStart dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop dragend->todo#dragEnd mousemove->todo#placeTip" } do %>
         <% if nested_tickets.any? %>
           <button type="button" class="todo-fold" title="<%= l(:label_todo_fold_line) %>" aria-expanded="true"
@@ -11,16 +13,18 @@
         <% else %>
           <span class="todo-fold-spacer"></span>
         <% end %>
-        <%= check_box_tag "ids[]", ticket.id, false, id: nil, class: "todo-context-menu-selection" %>
         <%= check_box_tag nil, "1", ticket.closed?, id: nil, class: "todo-checkbox",
                           data: { action: "click->todo#keepClick change->todo#toggle" } %>
-        <span class="todo-subject" data-action="click->todo#keepClick click->todo#edit"><%= ticket.subject %></span>
-        <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
-        <% if nested_tickets.any? && (counts = todo_tree.descendant_counts_for(ticket)) %>
-          <span class="todo-counts"><%= l(:text_todo_counts, open: counts.open, closed: counts.closed) %></span>
-        <% end %>
-        <button type="button" class="todo-add-child" title="<%= l(:label_todo_add_child) %>"
-                data-action="click->todo#keepClick click->todo#addChild">+</button>
+        <div class="todo-line-body hascontextmenu">
+          <%= check_box_tag "ids[]", ticket.id, false, id: nil, class: "todo-context-menu-selection" %>
+          <span class="todo-subject" data-action="click->todo#keepClick click->todo#edit"><%= ticket.subject %></span>
+          <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
+          <% if nested_tickets.any? && (counts = todo_tree.descendant_counts_for(ticket)) %>
+            <span class="todo-counts"><%= l(:text_todo_counts, open: counts.open, closed: counts.closed) %></span>
+          <% end %>
+          <button type="button" class="todo-add-child" title="<%= l(:label_todo_add_child) %>"
+                  data-action="click->todo#keepClick click->todo#addChild">+</button>
+        </div>
         <span class="tip"><%= render_issue_tooltip ticket %></span>
       <% end %>
       <% if nested_tickets.any? %>

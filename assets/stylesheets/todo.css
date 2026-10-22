@@ -44,3 +44,8 @@
 .todo .todo-add-child { border: 0; background: none; cursor: pointer; font-size: 1.4em; line-height: 1; color: inherit; margin-left: 6px; opacity: 0; vertical-align: middle; }
 .todo .todo-line-text:hover .todo-add-child, .todo .todo-add-child:focus { opacity: 0.8; }
 @media (hover: none) { .todo .todo-add-child { opacity: 0.4; } }
+
+/* The line is a row: arrow and checkbox, then the part Redmine's context menu can select, which takes the rest. */
+.todo .todo-line-text { display: flex; align-items: baseline; }
+.todo .todo-fold, .todo .todo-fold-spacer, .todo .todo-checkbox { flex: none; }
+.todo .todo-line-body { flex: 1 1 auto; min-width: 0; padding: 0 6px; border-radius: 3px; }

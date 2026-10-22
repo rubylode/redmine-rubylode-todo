@@ -67,6 +67,16 @@ class TodoPageTest < Redmine::IntegrationTest
     assert_select "li[data-ticket-id='#{@sibling.id}'] .todo-counts", count: 0
   end
 
+  test "the close checkbox is outside the element Redmine's context menu script treats as a row" do
+    # That script ticks and unticks every checkbox inside such an element to mirror its selection.
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo", params: { show_closed: "1" }
+    assert_select ".hascontextmenu .todo-checkbox", count: 0
+    assert_select ".hascontextmenu .todo-fold", count: 0
+    assert_select ".hascontextmenu input[type=checkbox]", count: 4 # only the hidden selection box of each line
+    assert_select "li[data-ticket-id='#{@closed.id}'] .todo-checkbox[checked]", count: 1
+  end
+
   test "a member without the permission is refused" do
     Role.find(1).remove_permission!(:use_todo)
     log_user("jsmith", "jsmith")
