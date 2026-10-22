@@ -5,3 +5,4 @@ en:
   label_todo_show_closed: Show closed tickets
   label_todo_hide_closed: Hide closed tickets
   text_todo_empty: Nothing to do.
+  text_todo_blank_subject: The line is empty.

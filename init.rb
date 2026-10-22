@@ -8,7 +8,7 @@ Redmine::Plugin.register :redmine_todo do
   requires_redmine version_or_higher: "7.0.0"
 
   project_module :todo do
-    permission :use_todo, { todo: [:index] }, read: true
+    permission :use_todo, { todo: %i[index create update] }
   end
 
   menu :project_menu, :todo, { controller: "todo", action: "index" },
