@@ -13,7 +13,7 @@ class TodoController < ApplicationController
       tickets = tickets.where(id: tickets.open.pluck(:id) | kept_ids)
     end
     tickets = tickets.includes(:status, :tracker, :priority, :assigned_to)
-    @todo_tree = TodoTree.new(tickets.order(:id).to_a)
+    @todo_tree = TodoTree.new(tickets.order(:id).to_a, descendant_counts)
   end
 
   def create
@@ -104,6 +104,11 @@ class TodoController < ApplicationController
   end
 
   private
+
+  def descendant_counts
+    rows = Issue.visible.where(project_id: @project.id).joins(:status).pluck(:id, :parent_id, "issue_statuses.is_closed")
+    TodoDescendantCounts.new(rows)
+  end
 
   def project_ticket_or_nil(id)
     Issue.visible.where(project_id: @project.id).find_by(id: id) if id.present?

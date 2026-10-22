@@ -56,6 +56,17 @@ class TodoPageTest < Redmine::IntegrationTest
     assert_select "li[data-ticket-id='#{elsewhere.id}']", count: 0
   end
 
+  test "a line with tickets below it shows how many are open and how many are closed, at every depth" do
+    grandchild = Issue.generate!(project_id: @project.id, subject: "Check the timetable", parent_issue_id: @child.id)
+    Issue.generate!(project_id: @project.id, subject: "Old booking", parent_issue_id: @parent.id, status_id: 5)
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    assert_select "li[data-ticket-id='#{@parent.id}'] > div .todo-counts", text: "2 open, 1 closed"
+    assert_select "li[data-ticket-id='#{@child.id}'] > div .todo-counts", text: "1 open, 0 closed"
+    assert_select "li[data-ticket-id='#{grandchild.id}'] .todo-counts", count: 0
+    assert_select "li[data-ticket-id='#{@sibling.id}'] .todo-counts", count: 0
+  end
+
   test "a member without the permission is refused" do
     Role.find(1).remove_permission!(:use_todo)
     log_user("jsmith", "jsmith")

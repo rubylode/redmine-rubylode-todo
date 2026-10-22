@@ -16,6 +16,9 @@
                           data: { action: "click->todo#keepClick change->todo#toggle" } %>
         <span class="todo-subject" data-action="click->todo#keepClick click->todo#edit"><%= ticket.subject %></span>
         <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
+        <% if nested_tickets.any? && (counts = todo_tree.descendant_counts_for(ticket)) %>
+          <span class="todo-counts"><%= l(:text_todo_counts, open: counts.open, closed: counts.closed) %></span>
+        <% end %>
         <span class="tip"><%= render_issue_tooltip ticket %></span>
       <% end %>
       <% if nested_tickets.any? %>
