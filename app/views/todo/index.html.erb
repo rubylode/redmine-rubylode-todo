@@ -1,0 +1,20 @@
+<% html_title l(:label_todo) %>
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag "todo", plugin: "redmine_todo" %>
+<% end %>
+
+<div class="contextual">
+  <% if @show_closed %>
+    <%= link_to l(:label_todo_hide_closed), project_todo_path(@project) %>
+  <% else %>
+    <%= link_to l(:label_todo_show_closed), project_todo_path(@project, show_closed: 1) %>
+  <% end %>
+</div>
+
+<h2><%= l(:label_todo) %></h2>
+
+<% if @todo_tree.top_level_tickets.empty? %>
+  <p class="nodata"><%= l(:text_todo_empty) %></p>
+<% else %>
+  <%= render "todo/lines", todo_tree: @todo_tree, tickets: @todo_tree.top_level_tickets, top_level: true %>
+<% end %>

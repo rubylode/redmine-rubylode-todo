@@ -1,0 +1,7 @@
+en:
+  label_todo: To-do
+  project_module_todo: To-do
+  permission_use_todo: Use the to-do list
+  label_todo_show_closed: Show closed tickets
+  label_todo_hide_closed: Hide closed tickets
+  text_todo_empty: Nothing to do.

@@ -1,0 +1,14 @@
+<%= tag.ul class: ["todo-list", { "todo-nested-list": !top_level }] do %>
+  <% tickets.each do |ticket| %>
+    <%= tag.li class: ["todo-line", { "todo-line-closed": ticket.closed? }], data: { ticket_id: ticket.id } do %>
+      <div class="todo-line-text tooltip">
+        <%= link_to ticket.subject, issue_path(ticket) %>
+        <span class="tip"><%= render_issue_tooltip ticket %></span>
+      </div>
+      <% nested_tickets = todo_tree.children_of(ticket) %>
+      <% if nested_tickets.any? %>
+        <%= render "todo/lines", todo_tree: todo_tree, tickets: nested_tickets, top_level: false %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>
