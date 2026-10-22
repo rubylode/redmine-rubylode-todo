@@ -13,7 +13,11 @@ and anything bigger is one click away from the normal ticket edit.
 - Click a line's text to edit the subject. Enter saves it and opens a new line right below, as in a notes app. Keep
   pressing Enter to keep adding. In a new line, Tab nests it under the line above, Shift+Tab moves it back out,
   Escape (or Backspace on an empty line) stops. A + on each line adds a child under it.
-- Escape cancels an edit.
+- Escape cancels an edit. While editing: Up and Down go to the line above or below, Alt+Up and Alt+Down move the
+  line among its siblings, Alt+Right nests it under the line above, Alt+Left moves it back out, and Cmd+Enter
+  (Ctrl+Enter) closes or reopens it.
+- Paste several lines into the new-line box (or into a new line) to create one ticket per line. Two spaces or a tab
+  nest a line under the one above, and list markers (`- `, `* `, `1. `, `- [ ] `) are dropped. Up to 100 lines.
 - The checkbox closes the ticket, or reopens it. A closed line stays in place, crossed out, until you reload the page.
   Closing a parent asks once before it closes the open tickets below it.
 - An arrow on a line with children folds it. Collapse all and Expand all are above the list. Folding is remembered per browser.

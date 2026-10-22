@@ -5,7 +5,7 @@ import { application } from "controllers/application"
 // so what is on the page is always what the server stored.
 class TodoController extends Controller {
   static targets = ["list", "message", "newLine"]
-  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, composerPlaceholder: String, failure: String }
+  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, composerPlaceholder: String, tooManyLines: String, failure: String }
 
   connect() {
     this.closedThisVisit = new Set()
@@ -72,6 +72,12 @@ class TodoController extends Controller {
   }
 
   async addLine(event) {
+    if (event.key === "ArrowUp" && this.newLineTarget.value === "") {
+      event.preventDefault()
+      const lastLine = this.visibleLines().pop()
+      if (lastLine) this.startEditById(lastLine.dataset.ticketId)
+      return
+    }
     if (event.key !== "Enter" || event.isComposing) return
     event.preventDefault()
     const subject = this.newLineTarget.value.trim()
@@ -84,7 +90,22 @@ class TodoController extends Controller {
   }
 
   edit(event) {
-    const subjectElement = event.currentTarget
+    this.startEdit(event.currentTarget)
+  }
+
+  startEditById(ticketId) {
+    const subjectElement = this.listTarget.querySelector(`li[data-ticket-id="${ticketId}"] > .todo-line-text .todo-subject`)
+    if (subjectElement) this.startEdit(subjectElement)
+  }
+
+  // Editing a line in place, with the keys of a notes app:
+  //   Enter            save, then open a new line below
+  //   Cmd/Ctrl+Enter   save, then close or reopen the line
+  //   Up / Down        save, then edit the line above or below
+  //   Alt+Up / Alt+Down       move the line up or down among its siblings
+  //   Alt+Right / Alt+Left    nest it under the line above, or move it back out
+  //   Escape           cancel
+  startEdit(subjectElement) {
     const original = subjectElement.textContent
     const input = document.createElement("input")
     input.type = "text"
@@ -93,29 +114,100 @@ class TodoController extends Controller {
     subjectElement.replaceWith(input)
     input.focus()
 
-    const ticketId = this.ticketIdOf(input)
+    const line = input.closest("li")
+    const ticketId = line.dataset.ticketId
     let finished = false
-    // addBelow: Enter saves the line and opens a new one right under it, as in a notes app.
-    const finish = async (save, addBelow = false) => {
+    const finish = async (save, next = {}) => {
       if (finished) return
       finished = true
+      // Read where the neighbours are before anything is saved and the list is drawn again.
+      const neighborId = next.offset ? this.visibleNeighborId(line, next.offset) : null
+      const moveParams = next.direction ? this.moveParamsFor(line, next.direction) : null
+
+      let changed = false
       const subject = input.value.trim()
-      let refreshed = false
       if (save && subject !== "" && subject !== original) {
-        if (await this.send("PATCH", this.linePath(ticketId), { subject })) {
-          await this.refresh()
-          refreshed = true
-        }
+        if (!(await this.send("PATCH", this.linePath(ticketId), { subject }))) return input.replaceWith(subjectElement)
+        changed = true
       }
-      if (!refreshed) input.replaceWith(subjectElement)
-      if (addBelow) this.openComposerAfter(this.listTarget.querySelector(`li[data-ticket-id="${ticketId}"]`))
+      if (moveParams) {
+        if (!(await this.send("PATCH", `${this.linePath(ticketId)}/move`, moveParams))) {
+          return changed ? this.refresh() : input.replaceWith(subjectElement)
+        }
+        changed = true
+      }
+      if (changed) {
+        await this.refresh()
+      } else {
+        input.replaceWith(subjectElement)
+      }
+
+      if (next.addBelow) this.openComposerAfter(this.listTarget.querySelector(`li[data-ticket-id="${ticketId}"]`))
+      if (next.toggle) this.toggleLineCheckbox(ticketId)
+      if (neighborId) this.startEditById(neighborId)
+      if (next.offset === 1 && !neighborId) this.newLineTarget.focus()
+      if (moveParams) this.startEditById(ticketId)
     }
+
     input.addEventListener("keydown", (keyEvent) => {
       if (keyEvent.isComposing) return
-      if (keyEvent.key === "Enter") finish(true, true)
-      if (keyEvent.key === "Escape") finish(false)
+      const { key, altKey } = keyEvent
+      if (key === "Enter" && (keyEvent.metaKey || keyEvent.ctrlKey)) {
+        keyEvent.preventDefault()
+        finish(true, { toggle: true })
+      } else if (key === "Enter") {
+        keyEvent.preventDefault()
+        finish(true, { addBelow: true })
+      } else if (key === "Escape") {
+        finish(false)
+      } else if (altKey && key.startsWith("Arrow")) {
+        keyEvent.preventDefault()
+        const direction = key.replace("Arrow", "").toLowerCase()
+        if (this.moveParamsFor(line, direction)) finish(true, { direction })
+      } else if (key === "ArrowUp" || key === "ArrowDown") {
+        keyEvent.preventDefault()
+        finish(true, { offset: key === "ArrowUp" ? -1 : 1 })
+      }
     })
     input.addEventListener("blur", () => finish(true))
+  }
+
+  toggleLineCheckbox(ticketId) {
+    const checkbox = this.listTarget.querySelector(`li[data-ticket-id="${ticketId}"] > .todo-line-text .todo-checkbox`)
+    if (!checkbox) return
+    checkbox.checked = !checkbox.checked
+    this.toggle({ currentTarget: checkbox })
+  }
+
+  visibleLines() {
+    return [...this.listTarget.querySelectorAll("li.todo-line")].filter((line) => line.offsetParent !== null)
+  }
+
+  visibleNeighborId(line, offset) {
+    const lines = this.visibleLines()
+    return lines[lines.indexOf(line) + offset]?.dataset.ticketId || null
+  }
+
+  // The parent and the sibling to put the line in front of, for Alt+arrow moves. Null when the move makes no sense.
+  moveParamsFor(line, direction) {
+    const siblingId = (element) => element?.dataset.ticketId
+    const previous = line.previousElementSibling
+    const next = line.nextElementSibling
+    const parentLine = line.parentElement.closest("li[data-ticket-id]")
+    if (direction === "up" && siblingId(previous)) {
+      return { parent_id: line.dataset.parentId || "", before_id: previous.dataset.ticketId }
+    }
+    if (direction === "down" && siblingId(next)) {
+      return { parent_id: line.dataset.parentId || "", before_id: siblingId(next.nextElementSibling) || "" }
+    }
+    if (direction === "right" && siblingId(previous)) {
+      return { parent_id: previous.dataset.ticketId, before_id: "" }
+    }
+    if (direction === "left" && parentLine) {
+      const grandparentLine = parentLine.parentElement.closest("li[data-ticket-id]")
+      return { parent_id: grandparentLine?.dataset.ticketId || "", before_id: siblingId(parentLine.nextElementSibling) || "" }
+    }
+    return null
   }
 
   // The composer is a new, empty line. Enter saves it and opens the next one below, Tab nests it under the
@@ -157,12 +249,75 @@ class TodoController extends Controller {
       } else if (keyEvent.key === "Tab") {
         keyEvent.preventDefault()
         keyEvent.shiftKey ? this.outdentComposer(composer, input) : this.indentComposer(composer, input)
+      } else if ((keyEvent.key === "ArrowUp" || keyEvent.key === "ArrowDown") && input.value === "") {
+        keyEvent.preventDefault()
+        this.leaveComposerToward(composer, keyEvent.key === "ArrowUp" ? -1 : 1)
       }
+    })
+    input.addEventListener("paste", (pasteEvent) => {
+      const parentLine = composer.parentElement.closest("li[data-ticket-id]")
+      this.pasteLines(pasteEvent, parentLine?.dataset.ticketId || "", composer.nextElementSibling?.dataset.ticketId || "")
     })
     input.addEventListener("blur", () => {
       if (this.movingComposer || composer.dataset.submitting || !composer.isConnected) return
       input.value.trim() === "" ? this.closeComposer() : this.submitComposer(composer, input, { keepGoing: false })
     })
+  }
+
+  // Up or Down from an empty new line: close it and edit the line above or below it.
+  leaveComposerToward(composer, offset) {
+    let neighbor = offset < 0 ? composer.previousElementSibling : composer.nextElementSibling
+    if (offset < 0) {
+      while (neighbor?.querySelector(":scope > ul > li[data-ticket-id]") && neighbor.offsetParent !== null) {
+        neighbor = neighbor.querySelector(":scope > ul").lastElementChild
+      }
+    }
+    const neighborId = neighbor?.dataset?.ticketId
+    this.closeComposer()
+    if (neighborId) this.startEditById(neighborId)
+  }
+
+  // Pasting several lines makes one ticket per line. Leading spaces (two per level) or tabs nest a line under the
+  // one above, and list markers ("- ", "* ", "1. ", "- [ ] ") are dropped. A single line pastes as usual.
+  pasteLines(pasteEvent, parentId, beforeId) {
+    const items = this.parsePastedLines(pasteEvent.clipboardData.getData("text"))
+    if (items.length < 2) return
+    pasteEvent.preventDefault()
+    this.createLines(items, parentId, beforeId)
+  }
+
+  pasteIntoNewLine(event) {
+    this.pasteLines(event, "", "")
+  }
+
+  parsePastedLines(text) {
+    return text.split(/\r?\n/).map((line) => {
+      const indent = line.match(/^[ \t]*/)[0]
+      const columns = [...indent].reduce((count, character) => count + (character === "\t" ? 2 : 1), 0)
+      const subject = line.trim().replace(/^(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/, "")
+      return { level: Math.floor(columns / 2), subject }
+    }).filter((item) => item.subject !== "")
+  }
+
+  async createLines(items, parentId, beforeId) {
+    const maximumLines = 100
+    if (items.length > maximumLines) return this.showMessage(this.tooManyLinesValue.replace("%{count}", maximumLines))
+
+    const createdIds = []
+    for (const item of items) {
+      const level = Math.min(item.level, createdIds.length)
+      const params = {
+        subject: item.subject,
+        parent_id: level === 0 ? parentId : createdIds[level - 1],
+        before_id: level === 0 ? beforeId : ""
+      }
+      if (!(await this.send("POST", this.linesPathValue, params))) break
+      createdIds.length = level
+      createdIds[level] = this.lastBody.id
+    }
+    this.closeComposer()
+    this.newLineTarget.value = ""
+    await this.refresh()
   }
 
   closeComposer() {
