@@ -8,6 +8,9 @@ en:
   text_todo_blank_subject: The line is empty.
   text_todo_no_status_allowed: "Your role cannot move %{ticket} to that status."
   text_todo_no_subtask_right: "Your role cannot make a ticket a subtask."
+  label_todo_collapse_all: Collapse all
+  label_todo_expand_all: Expand all
+  label_todo_fold_line: Fold or unfold the lines below
   label_todo_new_line: Add a line and press Enter
   text_todo_confirm_close_subtree: "Closing this also closes %{count} open ticket(s) below it. Continue?"
   text_todo_request_failed: The change could not be saved. Reload the page and try again.

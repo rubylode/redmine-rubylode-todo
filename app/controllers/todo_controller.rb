@@ -6,8 +6,13 @@ class TodoController < ApplicationController
 
   def index
     @show_closed = params[:show_closed] == "1"
-    tickets = Issue.visible.where(project_id: @project.id).includes(:status, :tracker, :priority, :assigned_to)
-    tickets = tickets.open unless @show_closed
+    tickets = Issue.visible.where(project_id: @project.id)
+    unless @show_closed
+      # Tickets closed during this visit stay on the page, crossed out, until it is reloaded.
+      kept_ids = params[:keep].to_s.split(",").map(&:to_i)
+      tickets = tickets.where(id: tickets.open.pluck(:id) | kept_ids)
+    end
+    tickets = tickets.includes(:status, :tracker, :priority, :assigned_to)
     @todo_tree = TodoTree.new(tickets.order(:id).to_a)
   end
 

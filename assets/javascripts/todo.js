@@ -7,6 +7,70 @@ class TodoController extends Controller {
   static targets = ["list", "message", "newLine"]
   static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, failure: String }
 
+  connect() {
+    this.closedThisVisit = new Set()
+    this.foldedIds = this.loadFoldedIds()
+    this.applyFolds()
+  }
+
+  // Folding is a per-browser convenience, so it lives in localStorage, which may be unavailable.
+  get foldStorageKey() {
+    return `redmine_todo.folded.${this.linesPathValue}`
+  }
+
+  loadFoldedIds() {
+    try {
+      return new Set(JSON.parse(window.localStorage.getItem(this.foldStorageKey) || "[]"))
+    } catch (error) {
+      return new Set()
+    }
+  }
+
+  saveFoldedIds() {
+    try {
+      window.localStorage.setItem(this.foldStorageKey, JSON.stringify([...this.foldedIds]))
+    } catch (error) {
+      // folding still works for this visit
+    }
+  }
+
+  foldableLines() {
+    return [...this.listTarget.querySelectorAll("li[data-ticket-id]")].filter((line) => line.querySelector(":scope > ul"))
+  }
+
+  applyFolds() {
+    this.foldableLines().forEach((line) => {
+      const folded = this.foldedIds.has(line.dataset.ticketId)
+      line.classList.toggle("todo-folded", folded)
+      line.querySelector(":scope > .todo-line-text .todo-fold")?.setAttribute("aria-expanded", String(!folded))
+    })
+  }
+
+  toggleFold(event) {
+    const ticketId = this.ticketIdOf(event.currentTarget)
+    if (this.foldedIds.has(ticketId)) {
+      this.foldedIds.delete(ticketId)
+    } else {
+      this.foldedIds.add(ticketId)
+    }
+    this.saveFoldedIds()
+    this.applyFolds()
+  }
+
+  collapseAll(event) {
+    event.preventDefault()
+    this.foldableLines().forEach((line) => this.foldedIds.add(line.dataset.ticketId))
+    this.saveFoldedIds()
+    this.applyFolds()
+  }
+
+  expandAll(event) {
+    event.preventDefault()
+    this.foldedIds.clear()
+    this.saveFoldedIds()
+    this.applyFolds()
+  }
+
   async addLine(event) {
     if (event.key !== "Enter" || event.isComposing) return
     event.preventDefault()
@@ -52,10 +116,14 @@ class TodoController extends Controller {
 
   async toggle(event) {
     const checkbox = event.currentTarget
-    const path = `${this.linePath(this.ticketIdOf(checkbox))}/close`
+    const line = checkbox.closest("li")
+    const path = `${this.linePath(line.dataset.ticketId)}/close`
     if (!checkbox.checked) {
       return this.finishToggle(checkbox, await this.send("DELETE", path))
     }
+
+    // The line and the lines below it stay in place, crossed out, until the page is reloaded.
+    const closedIds = [line, ...line.querySelectorAll("li[data-ticket-id]")].map((nested) => nested.dataset.ticketId)
 
     let result = await this.send("POST", path, {}, { quiet: [409] })
     if (result === false && this.lastStatus === 409) {
@@ -63,11 +131,12 @@ class TodoController extends Controller {
       if (!window.confirm(message)) return this.finishToggle(checkbox, false)
       result = await this.send("POST", path, { close_subtree: "1" })
     }
-    this.finishToggle(checkbox, result)
+    this.finishToggle(checkbox, result, closedIds)
   }
 
-  async finishToggle(checkbox, succeeded) {
+  async finishToggle(checkbox, succeeded, closedIds = []) {
     if (succeeded) {
+      closedIds.forEach((ticketId) => this.closedThisVisit.add(ticketId))
       await this.refresh()
     } else {
       checkbox.checked = !checkbox.checked
@@ -171,11 +240,14 @@ class TodoController extends Controller {
   }
 
   async refresh() {
-    const response = await fetch(this.pageUrlValue, { credentials: "same-origin" })
+    const url = new URL(this.pageUrlValue, window.location.origin)
+    if (this.closedThisVisit.size > 0) url.searchParams.set("keep", [...this.closedThisVisit].join(","))
+    const response = await fetch(url, { credentials: "same-origin" })
     if (!response.ok) return this.showMessage(this.failureValue)
     const page = new DOMParser().parseFromString(await response.text(), "text/html")
     const freshList = page.querySelector("[data-todo-target=list]")
-    if (freshList) this.listTarget.innerHTML = freshList.innerHTML
+    if (freshList) this.listTarget.replaceChildren(...freshList.childNodes)
+    this.applyFolds()
   }
 
   showMessage(text) {

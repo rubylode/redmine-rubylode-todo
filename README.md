@@ -11,7 +11,9 @@ and anything bigger is one click away from the normal ticket edit.
 - Lists a project's open tickets, children nested under their parent. A link shows closed ones crossed out.
 - Type a line at the bottom and press Enter to create a ticket (default tracker, status and priority, assigned to you).
 - Click a line's text to edit the subject. Enter saves, Escape cancels.
-- The checkbox closes the ticket, or reopens it. Closing a parent asks once before it closes the open tickets below it.
+- The checkbox closes the ticket, or reopens it. A closed line stays in place, crossed out, until you reload the page.
+  Closing a parent asks once before it closes the open tickets below it.
+- An arrow on a line with children folds it. Collapse all and Expand all are above the list. Folding is remembered per browser.
 - Drag a line onto the middle of another to make it a child. Drag to the top or bottom edge of a line to reorder.
   The order is shared by everyone who can open the page.
 - Hover a line for Redmine's own ticket tooltip. Right-click for Redmine's own ticket menu (status, priority,

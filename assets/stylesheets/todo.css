@@ -29,3 +29,10 @@
   visibility: visible; opacity: 1;
   transition: opacity 0.15s ease 0.5s, visibility 0s linear 0.5s;
 }
+
+/* Folding: an arrow on lines that have children; a folded line hides its nested list. */
+.todo .todo-fold, .todo .todo-fold-spacer { display: inline-block; width: 18px; margin-right: 2px; vertical-align: middle; }
+.todo .todo-fold { border: 0; background: none; padding: 0; cursor: pointer; font-size: 0.9em; color: inherit; }
+.todo .todo-fold::before { content: "\25BE"; }
+.todo li.todo-folded > .todo-line-text .todo-fold::before { content: "\25B8"; }
+.todo li.todo-folded > ul.todo-nested-list { display: none; }

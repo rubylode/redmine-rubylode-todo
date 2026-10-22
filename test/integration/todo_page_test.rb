@@ -42,6 +42,20 @@ class TodoPageTest < Redmine::IntegrationTest
     assert_select "li.todo-line-closed[data-ticket-id='#{@closed.id}']", text: /Old chore/
   end
 
+  test "a ticket asked to be kept shows crossed out in its place although closed tickets are hidden" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo", params: { keep: "#{@closed.id},999999" }
+    assert_select "li.todo-line-closed[data-ticket-id='#{@closed.id}']", text: /Old chore/
+    assert_select "li[data-ticket-id='#{@sibling.id}']"
+  end
+
+  test "a ticket of another project cannot be kept into the list" do
+    elsewhere = Issue.generate!(project_id: 3, subject: "Elsewhere", status_id: 5)
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo", params: { keep: elsewhere.id.to_s }
+    assert_select "li[data-ticket-id='#{elsewhere.id}']", count: 0
+  end
+
   test "a member without the permission is refused" do
     Role.find(1).remove_permission!(:use_todo)
     log_user("jsmith", "jsmith")

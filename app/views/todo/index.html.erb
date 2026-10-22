@@ -5,14 +5,6 @@
 <% end %>
 <%= context_menu %>
 
-<div class="contextual">
-  <% if @show_closed %>
-    <%= link_to l(:label_todo_hide_closed), project_todo_path(@project) %>
-  <% else %>
-    <%= link_to l(:label_todo_show_closed), project_todo_path(@project, show_closed: 1) %>
-  <% end %>
-</div>
-
 <h2><%= l(:label_todo) %></h2>
 
 <%= tag.div class: "todo",
@@ -21,6 +13,16 @@
                     todo_page_url_value: project_todo_path(@project, show_closed: (1 if @show_closed)),
                     todo_confirm_close_subtree_value: l(:text_todo_confirm_close_subtree, count: "%{count}"),
                     todo_failure_value: l(:text_todo_request_failed) } do %>
+  <div class="contextual">
+    <a href="#" data-action="click->todo#collapseAll"><%= l(:label_todo_collapse_all) %></a> |
+    <a href="#" data-action="click->todo#expandAll"><%= l(:label_todo_expand_all) %></a> |
+    <% if @show_closed %>
+      <%= link_to l(:label_todo_hide_closed), project_todo_path(@project) %>
+    <% else %>
+      <%= link_to l(:label_todo_show_closed), project_todo_path(@project, show_closed: 1) %>
+    <% end %>
+  </div>
+
   <p class="todo-message flash error" role="alert" hidden data-todo-target="message"></p>
 
   <%= form_tag({}, data: { cm_url: issues_context_menu_path }, onsubmit: "return false;") do %>
