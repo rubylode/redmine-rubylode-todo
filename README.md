@@ -6,6 +6,18 @@ Most of the time I just need a flat list: do A, do B, one nested item under B. R
 ticket form. This plugin gives each project a To-do page where every line is a ticket, so a quick list takes seconds
 and anything bigger is one click away from the normal ticket edit.
 
+## Features
+
+- A To-do page in every project that enables the module. Every line is a ticket, nested to any depth by parent and subtask.
+- Add lines in seconds: type and press Enter, keep going with Enter, nest with Tab, or paste a whole outline.
+- Edit in place, with notes-app keys: Up and Down between lines, Alt+arrows to move or nest, Cmd+Enter to tick.
+- A checkbox closes and reopens tickets. Closing a parent closes what is below it, after one confirmation.
+- Drag a line onto another to nest it, or between lines to reorder. The order is shared by everyone on the project.
+- Fold and unfold lines, with open and closed counts on every parent.
+- Redmine's own ticket tooltip on hover and its own context menu on right click (status, priority, assignee, edit, delete).
+- Everything goes through the normal ticket save, so workflow, permissions, journals and notification mails stay Redmine's.
+- No settings page, no extra gem, no JavaScript library. Redmine 7 and up. GPL v2 or later.
+
 ## What it does
 
 - Lists a project's open tickets, children nested under their parent. A link shows closed ones crossed out.
