@@ -1,6 +1,6 @@
 class TodoController < ApplicationController
   before_action :find_project_by_project_id, :authorize
-  before_action :find_ticket, only: %i[update close reopen]
+  before_action :find_ticket, only: %i[update close reopen move]
 
   helper :issues
 
@@ -65,11 +65,49 @@ class TodoController < ApplicationController
     failure ? render_failure(failure) : render(json: { id: @ticket.id })
   end
 
+  # parent_id: the line it becomes a child of (blank for top level); before_id: the sibling it goes in front of
+  # (blank for last).
+  def move
+    return deny_access unless @ticket.attributes_editable?(User.current)
+
+    parent = project_ticket_or_nil(params[:parent_id])
+    before = project_ticket_or_nil(params[:before_id])
+    return render_404 if (params[:parent_id].present? && parent.nil?) || (params[:before_id].present? && before.nil?)
+
+    Issue.transaction do
+      failure = change_parent(@ticket, parent)
+      return render_failure(failure) if failure
+
+      siblings = TodoPosition.sort(Issue.visible.where(project_id: @project.id, parent_id: parent&.id).to_a) - [@ticket]
+      insert_at = before && siblings.index(before) || siblings.size
+      TodoPosition.place(siblings.insert(insert_at, @ticket))
+    end
+    render json: { id: @ticket.id }
+  end
+
   private
+
+  def project_ticket_or_nil(id)
+    Issue.visible.where(project_id: @project.id).find_by(id: id) if id.present?
+  end
+
+  # Returns an error message, or nil when the ticket now has the given parent.
+  def change_parent(ticket, parent)
+    return nil if ticket.parent_id == parent&.id
+
+    ticket.init_journal(User.current)
+    ticket.safe_attributes = { "parent_issue_id" => parent&.id.to_s }
+    return l(:text_todo_no_subtask_right) unless ticket.parent_issue_id == parent&.id
+    return nil if ticket.save
+
+    ticket.errors.full_messages.to_sentence
+  end
 
   # Sets the status the block picks, through the normal ticket save. Returns an error message, or nil on success.
   # Redmine silently ignores a status the workflow forbids, so the result is checked.
   def change_status(ticket)
+    return l(:notice_not_authorized) unless ticket.visible?(User.current) && ticket.attributes_editable?(User.current)
+
     status = yield ticket
     return l(:text_todo_no_status_allowed, ticket: "##{ticket.id}") unless status
 

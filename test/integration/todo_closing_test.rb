@@ -63,4 +63,11 @@ class TodoClosingTest < Redmine::IntegrationTest
     assert_response :unprocessable_content
     assert_equal [false, false], [@ticket, child].map { |ticket| ticket.reload.closed? }
   end
+
+test "a person who may not edit tickets cannot close one" do
+  Role.find(1).remove_permission!(:edit_issues)
+  post "/projects/ecookbook/todo/lines/#{@ticket.id}/close"
+  assert_response :unprocessable_content
+  assert_not @ticket.reload.closed?
+end
 end

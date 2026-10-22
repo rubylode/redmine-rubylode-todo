@@ -1,9 +1,11 @@
-# Arranges tickets into nested lines. A ticket whose parent is not in the given set
-# (another project, or hidden because it is closed) stands at the top level.
+# Arranges tickets into nested lines, siblings in the stored order. A ticket whose parent is not
+# in the given set (another project, or hidden because it is closed) stands at the top level.
 class TodoTree
   def initialize(tickets)
     ids = tickets.map(&:id)
-    @children_by_parent_id = tickets.group_by { |ticket| ids.include?(ticket.parent_id) ? ticket.parent_id : nil }
+    @children_by_parent_id = TodoPosition.sort(tickets).group_by do |ticket|
+      ids.include?(ticket.parent_id) ? ticket.parent_id : nil
+    end
   end
 
   def top_level_tickets

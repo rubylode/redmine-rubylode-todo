@@ -7,3 +7,4 @@ en:
   text_todo_empty: Nothing to do.
   text_todo_blank_subject: The line is empty.
   text_todo_no_status_allowed: "Your role cannot move %{ticket} to that status."
+  text_todo_no_subtask_right: "Your role cannot make a ticket a subtask."
