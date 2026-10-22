@@ -7,14 +7,14 @@
                   data: { action: "dragstart->todo#dragStart dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop dragend->todo#dragEnd" } do %>
         <% if nested_tickets.any? %>
           <button type="button" class="todo-fold" title="<%= l(:label_todo_fold_line) %>" aria-expanded="true"
-                  data-action="click->todo#toggleFold"></button>
+                  data-action="click->todo#keepClick click->todo#toggleFold"></button>
         <% else %>
           <span class="todo-fold-spacer"></span>
         <% end %>
         <%= check_box_tag "ids[]", ticket.id, false, id: nil, class: "todo-context-menu-selection" %>
         <%= check_box_tag nil, "1", ticket.closed?, id: nil, class: "todo-checkbox",
-                          data: { action: "change->todo#toggle" } %>
-        <span class="todo-subject" data-action="click->todo#edit"><%= ticket.subject %></span>
+                          data: { action: "click->todo#keepClick change->todo#toggle" } %>
+        <span class="todo-subject" data-action="click->todo#keepClick click->todo#edit"><%= ticket.subject %></span>
         <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
         <span class="tip"><%= render_issue_tooltip ticket %></span>
       <% end %>

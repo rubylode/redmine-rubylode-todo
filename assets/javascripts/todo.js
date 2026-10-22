@@ -114,9 +114,16 @@ class TodoController extends Controller {
     input.addEventListener("blur", () => finish(true))
   }
 
+  // Redmine's context menu script selects (and highlights) a row on any click inside it. Clicks on the
+  // line's own controls are not row selections, so they stop here.
+  keepClick(event) {
+    event.stopPropagation()
+  }
+
   async toggle(event) {
     const checkbox = event.currentTarget
     const line = checkbox.closest("li")
+    line.classList.toggle("todo-line-closed", checkbox.checked) // cross out at once; undone if the server refuses
     const path = `${this.linePath(line.dataset.ticketId)}/close`
     if (!checkbox.checked) {
       return this.finishToggle(checkbox, await this.send("DELETE", path))
@@ -140,6 +147,7 @@ class TodoController extends Controller {
       await this.refresh()
     } else {
       checkbox.checked = !checkbox.checked
+      checkbox.closest("li").classList.toggle("todo-line-closed", checkbox.checked)
     }
   }
 
