@@ -1,6 +1,6 @@
 class TodoController < ApplicationController
   before_action :find_project_by_project_id, :authorize
-  before_action :find_ticket, only: %i[update]
+  before_action :find_ticket, only: %i[update close reopen]
 
   helper :issues
 
@@ -17,7 +17,10 @@ class TodoController < ApplicationController
     return deny_access unless User.current.allowed_to?(:add_issues, @project)
 
     ticket = Issue.new(project: @project, author: User.current, subject: subject)
-    ticket.tracker = @project.trackers.first
+    tracker = ticket.allowed_target_trackers(User.current).first
+    return deny_access unless tracker
+
+    ticket.tracker = tracker
     ticket.status = ticket.tracker.default_status
     ticket.priority = IssuePriority.default || IssuePriority.active.first
     ticket.assigned_to = User.current if ticket.assignable_users.include?(User.current)
@@ -40,7 +43,51 @@ class TodoController < ApplicationController
     end
   end
 
+  def close
+    open_descendants = @ticket.descendants.reject(&:closed?)
+    if open_descendants.any? && params[:close_subtree] != "1"
+      return render json: { open_descendant_count: open_descendants.size }, status: :conflict
+    end
+
+    failure = nil
+    Issue.transaction do
+      (open_descendants.reverse + [@ticket]).each do |ticket|
+        ticket.reload # closing a child updates its parent, which makes the loaded copy stale
+        failure = change_status(ticket) { |editable_ticket| first_allowed_closed_status(editable_ticket) }
+        raise ActiveRecord::Rollback if failure
+      end
+    end
+    failure ? render_failure(failure) : render(json: { id: @ticket.id })
+  end
+
+  def reopen
+    failure = change_status(@ticket) { |ticket| allowed_status(ticket, ticket.tracker.default_status) }
+    failure ? render_failure(failure) : render(json: { id: @ticket.id })
+  end
+
   private
+
+  # Sets the status the block picks, through the normal ticket save. Returns an error message, or nil on success.
+  # Redmine silently ignores a status the workflow forbids, so the result is checked.
+  def change_status(ticket)
+    status = yield ticket
+    return l(:text_todo_no_status_allowed, ticket: "##{ticket.id}") unless status
+
+    ticket.init_journal(User.current)
+    ticket.safe_attributes = { "status_id" => status.id.to_s }
+    return l(:text_todo_no_status_allowed, ticket: "##{ticket.id}") unless ticket.status_id == status.id
+    return nil if ticket.save
+
+    ticket.errors.full_messages.to_sentence
+  end
+
+  def first_allowed_closed_status(ticket)
+    ticket.new_statuses_allowed_to(User.current).find(&:is_closed?)
+  end
+
+  def allowed_status(ticket, status)
+    status if status && ticket.new_statuses_allowed_to(User.current).include?(status)
+  end
 
   def find_ticket
     @ticket = Issue.visible.where(project_id: @project.id).find(params[:id])
