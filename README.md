@@ -178,4 +178,4 @@ automated test; check them by hand in the throwaway Redmine:
 
 GNU General Public License, version 2 or (at your option) any later version, the same as Redmine. See `LICENSE`.
 
-Copyright (C) 2026 Rubylode, Nick Gorbikoff. Each Ruby file carries the same short notice Redmine puts on its own.
+Copyright (C) 2026 Nick Gorbikoff. Each Ruby file carries the same short notice Redmine puts on its own.

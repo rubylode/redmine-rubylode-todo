@@ -1,5 +1,5 @@
 # Rubylode To-do: a to-do list over a project's tickets, for Redmine
-# Copyright (C) 2026  Rubylode, Nick Gorbikoff
+# Copyright (C) 2026  Nick Gorbikoff
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
