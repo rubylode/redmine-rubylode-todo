@@ -1,0 +1,52 @@
+name: tests
+
+# Runs the plugin's integration tests inside a real Redmine, the same steps as bin/test:
+# Redmine's source, the plugin in plugins/redmine_rubylode_todo, SQLite, then the plugin's test task.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Redmine ${{ matrix.redmine }}, Ruby ${{ matrix.ruby }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        redmine: ["7.0.2", "7.0-stable"]
+        ruby: ["3.4", "4.0"]
+    env:
+      RAILS_ENV: test
+      BUNDLE_WITHOUT: development
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: redmine/redmine
+          ref: ${{ matrix.redmine }}
+          path: redmine
+
+      - uses: actions/checkout@v4
+        with:
+          path: redmine/plugins/redmine_rubylode_todo
+
+      # Redmine's Gemfile picks the database gem from this file, so it has to exist before the gems are installed.
+      - name: Write the database settings
+        run: |
+          printf 'test:\n  adapter: sqlite3\n  database: db/test.sqlite3\n' > redmine/config/database.yml
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          working-directory: redmine
+
+      - name: Create the database and the plugin's table
+        working-directory: redmine
+        run: bundle exec rake generate_secret_token db:migrate redmine:plugins:migrate
+
+      - name: Run the plugin's tests
+        working-directory: redmine
+        run: bundle exec rake redmine:plugins:test:integration NAME=redmine_rubylode_todo
