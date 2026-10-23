@@ -9,8 +9,8 @@ class TodoPageTest < Redmine::IntegrationTest
 
   def setup
     @project = Project.find(1)
-    @project.enable_module!(:todo)
-    Role.find(1).add_permission!(:use_todo)
+    @project.enable_module!(:rubylode_todo)
+    Role.find(1).add_permission!(:use_rubylode_todo)
     Issue.where(project_id: @project.id).delete_all
     @parent = Issue.generate!(project_id: @project.id, subject: "Plan the trip")
     @child = Issue.generate!(project_id: @project.id, subject: "Book the train", parent_issue_id: @parent.id)
@@ -156,14 +156,14 @@ class TodoPageTest < Redmine::IntegrationTest
   end
 
   test "a member without the permission is refused" do
-    Role.find(1).remove_permission!(:use_todo)
+    Role.find(1).remove_permission!(:use_rubylode_todo)
     log_user("jsmith", "jsmith")
     get "/projects/ecookbook/todo"
     assert_response :forbidden
   end
 
   test "a project without the module is refused" do
-    @project.disable_module!(:todo)
+    @project.disable_module!(:rubylode_todo)
     log_user("jsmith", "jsmith")
     get "/projects/ecookbook/todo"
     assert_response :forbidden

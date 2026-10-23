@@ -51,13 +51,13 @@ as for any edit. The plugin has no settings page, no extra gem and no JavaScript
 
 ## Install
 
-1. Copy this folder to `plugins/redmine_todo` in your Redmine (the folder name must be `redmine_todo`).
+1. Copy this folder to `plugins/redmine_rubylode_todo` in your Redmine (the folder name must be `redmine_rubylode_todo`).
 2. Run `bundle exec rake redmine:plugins:migrate RAILS_ENV=production`. It creates one small table that keeps the order.
 3. Restart Redmine.
 4. In a project, enable the To-do module (Settings, Modules), then give a role the "Use the to-do list" permission
    (Administration, Roles and permissions).
 
-To remove it, run `bundle exec rake redmine:plugins:migrate NAME=redmine_todo VERSION=0 RAILS_ENV=production`
+To remove it, run `bundle exec rake redmine:plugins:migrate NAME=redmine_rubylode_todo VERSION=0 RAILS_ENV=production`
 and delete the folder.
 
 ## Try it

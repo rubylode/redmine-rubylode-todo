@@ -7,8 +7,8 @@ class TodoLinesTest < Redmine::IntegrationTest
 
   def setup
     @project = Project.find(1)
-    @project.enable_module!(:todo)
-    Role.find(1).add_permission!(:use_todo)
+    @project.enable_module!(:rubylode_todo)
+    Role.find(1).add_permission!(:use_rubylode_todo)
     Issue.where(project_id: @project.id).delete_all
     @user = User.find_by_login("jsmith")
     log_user("jsmith", "jsmith")

@@ -6,9 +6,9 @@ Dir.chdir(File.expand_path("..", __dir__))
 
 target = ARGV.first
 runner = if target
-  "bundle exec ruby -Itest plugins/redmine_todo/#{target}"
+  "bundle exec ruby -Itest plugins/redmine_rubylode_todo/#{target}"
 else
-  "bundle exec rake redmine:plugins:test:integration NAME=redmine_todo"
+  "bundle exec rake redmine:plugins:test:integration NAME=redmine_rubylode_todo"
 end
 
 inside = <<~SH

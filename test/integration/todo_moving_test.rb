@@ -7,8 +7,8 @@ class TodoMovingTest < Redmine::IntegrationTest
 
   def setup
     @project = Project.find(1)
-    @project.enable_module!(:todo)
-    Role.find(1).add_permission!(:use_todo)
+    @project.enable_module!(:rubylode_todo)
+    Role.find(1).add_permission!(:use_rubylode_todo)
     Issue.where(project_id: @project.id).delete_all
     @first = Issue.generate!(project_id: @project.id, subject: "First")
     @second = Issue.generate!(project_id: @project.id, subject: "Second")
@@ -39,7 +39,7 @@ class TodoMovingTest < Redmine::IntegrationTest
   test "the order is the same for another person" do
     move(@third, before: @first)
     post "/logout"
-    Role.find(2).add_permission!(:use_todo)
+    Role.find(2).add_permission!(:use_rubylode_todo)
     log_user("dlopper", "foo")
     assert_equal [@third.id, @first.id, @second.id], listed_ticket_ids
   end

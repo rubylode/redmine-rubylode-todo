@@ -13,7 +13,7 @@ services:
       # The image ships without the development gems, so production is the mode it can boot in.
       RAILS_ENV: production
     volumes:
-      - .:/usr/src/redmine/plugins/redmine_todo
+      - .:/usr/src/redmine/plugins/redmine_rubylode_todo
       - redmine-todo-files:/usr/src/redmine/files
       - redmine-todo-sqlite:/usr/src/redmine/sqlite
 
@@ -25,7 +25,7 @@ services:
     environment:
       RAILS_ENV: test
     volumes:
-      - .:/usr/src/redmine/plugins/redmine_todo
+      - .:/usr/src/redmine/plugins/redmine_rubylode_todo
 
 volumes:
   redmine-todo-files:
