@@ -115,5 +115,5 @@
 /* The ticket's own page, in a dialog. */
 .todo dialog.todo-ticket-dialog { width: min(980px, 96vw); max-height: 92vh; padding: 0; border: 1px solid var(--todo-rule); border-radius: 6px; overflow: hidden; }
 .todo dialog.todo-ticket-dialog::backdrop { background: rgba(0, 0, 0, 0.45); }
-.todo .todo-ticket-body { padding: 12px 20px 20px; overflow: auto; max-height: 92vh; }
+.todo .todo-ticket-body { padding: 40px 20px 20px; overflow: auto; max-height: 92vh; }
 .todo .todo-ticket-close { position: absolute; top: 6px; right: 10px; z-index: 1; border: 0; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: inherit; }
