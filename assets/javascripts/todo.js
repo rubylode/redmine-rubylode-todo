@@ -4,9 +4,9 @@ import { application } from "controllers/application"
 // The to-do list: every change is one request to the plugin, then the list is fetched again,
 // so what is on the page is always what the server stored.
 class TodoController extends Controller {
-  static targets = ["list", "message", "newLine", "shortcuts", "live"]
+  static targets = ["list", "message", "newLine", "shortcuts", "live", "ticketDialog", "ticketBody"]
   static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, composerPlaceholder: String, tooManyLines: String, failure: String,
-    editKeys: String, composerKeys: String, nestUnder: String, announcements: Object }
+    editKeys: String, composerKeys: String, nestUnder: String, announcements: Object, loading: String }
 
   connect() {
     this.closedThisVisit = new Set()
@@ -15,10 +15,25 @@ class TodoController extends Controller {
     this.restoreFullText()
     this.questionMarkHandler = (event) => this.openShortcutsOnQuestionMark(event)
     document.addEventListener("keydown", this.questionMarkHandler)
+    this.contextMenuEditHandler = (event) => this.openTicketFromContextMenu(event)
+    document.addEventListener("click", this.contextMenuEditHandler, true)
   }
 
   disconnect() {
     document.removeEventListener("keydown", this.questionMarkHandler)
+    document.removeEventListener("click", this.contextMenuEditHandler, true)
+  }
+
+  // Redmine's right-click menu has an Edit item that leaves for the ticket's edit page. Here it opens the
+  // same dialog as the ticket number, with the edit form already showing.
+  openTicketFromContextMenu(event) {
+    const link = event.target.closest?.("#context-menu a")
+    const ticketId = link?.getAttribute("href")?.match(/^\/issues\/(\d+)\/edit(?:\?|$)/)?.[1]
+    if (!ticketId || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
+    event.preventDefault()
+    event.stopPropagation()
+    window.contextMenuHide?.()
+    this.showTicket(ticketId, document.querySelector(`li[data-ticket-id="${ticketId}"] .todo-ticket-link`), { edit: true })
   }
 
   // The shortcut list opens from its link, or with ? when the focus is not in a field.
@@ -37,7 +52,7 @@ class TodoController extends Controller {
   toggleFullText(event) {
     event.preventDefault()
     const full = this.element.classList.toggle("is-full")
-    event.currentTarget.setAttribute("aria-pressed", String(full))
+    this.labelFullTextLink(event.currentTarget, full)
     try { window.localStorage.setItem(`redmine_todo.full.${this.linesPathValue}`, full ? "1" : "0") } catch (error) { /* per visit only */ }
   }
 
@@ -45,7 +60,91 @@ class TodoController extends Controller {
     let full = false
     try { full = window.localStorage.getItem(`redmine_todo.full.${this.linesPathValue}`) === "1" } catch (error) { /* default */ }
     this.element.classList.toggle("is-full", full)
-    this.element.querySelector("[data-action*='todo#toggleFullText']")?.setAttribute("aria-pressed", String(full))
+    const link = this.element.querySelector("[data-action*='todo#toggleFullText']")
+    if (link) this.labelFullTextLink(link, full)
+  }
+
+  // The link names what a click will do: show subjects whole, or cut them at two lines again.
+  labelFullTextLink(link, full) {
+    link.setAttribute("aria-pressed", String(full))
+    link.textContent = full ? link.dataset.todoCutLabel : link.dataset.todoFullLabel
+  }
+
+  // The ticket's own page opens in a dialog: its card, and the edit form behind the Edit button. The form is
+  // sent from here, so saving never leaves the list. Ctrl or Cmd click, or a middle click, still opens the page.
+  async openTicket(event) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    await this.showTicket(this.ticketIdOf(event.currentTarget), event.currentTarget)
+  }
+
+  async showTicket(ticketId, opener, { edit = false } = {}) {
+    this.openTicketId = ticketId
+    this.ticketOpener = opener
+    this.ticketBodyTarget.textContent = this.loadingValue
+    if (!this.ticketDialogTarget.open) this.ticketDialogTarget.showModal()
+    await this.loadTicket(`/issues/${ticketId}`)
+    if (edit) window.showAndScrollTo?.("update", "issue_subject")
+  }
+
+  async loadTicket(href) {
+    const url = new URL(href, window.location.origin)
+    url.searchParams.set("back_url", this.pageUrlValue) // where Redmine sends the browser after saving
+    const response = await fetch(url, { credentials: "same-origin", headers: { Accept: "text/html" } })
+    if (!response.ok) {
+      this.closeTicket()
+      return this.showMessage(this.failureValue)
+    }
+    this.showTicketPage(await response.text())
+  }
+
+  // Redmine's pages hold inline scripts for their widgets (editor toolbar, date fields); jQuery runs them
+  // when it inserts the page, as Redmine's own pages loaded by script do.
+  showTicketPage(html) {
+    const content = new DOMParser().parseFromString(html, "text/html").querySelector("#content")
+    if (!content) return this.showMessage(this.failureValue)
+    window.jQuery(this.ticketBodyTarget).html(content.innerHTML)
+  }
+
+  async submitTicket(event) {
+    const form = event.target
+    if (!form.matches("form#issue-form")) return
+    event.preventDefault()
+
+    let response
+    try {
+      response = await fetch(form.action, {
+        method: "POST",
+        body: new FormData(form, event.submitter),
+        credentials: "same-origin",
+        headers: { "X-CSRF-Token": document.querySelector("meta[name=csrf-token]")?.content || "" }
+      })
+    } catch (error) {
+      return this.showMessage(this.failureValue)
+    }
+
+    const listPath = new URL(this.pageUrlValue, window.location.origin).pathname
+    if (response.redirected && new URL(response.url).pathname === listPath) {
+      this.closedThisVisit.add(this.openTicketId) // it stays on the list, crossed out if it was closed
+      this.closeTicket()
+      this.announce("saved", this.openTicketId)
+      await this.refresh()
+    } else {
+      this.showTicketPage(await response.text()) // Redmine's own form, with its error messages
+    }
+  }
+
+  closeTicket() {
+    if (this.ticketDialogTarget.open) this.ticketDialogTarget.close()
+  }
+
+  closeTicketOnBackdrop(event) {
+    if (event.target === this.ticketDialogTarget) this.closeTicket()
+  }
+
+  clearTicket() {
+    window.jQuery(this.ticketBodyTarget).empty()
+    this.ticketOpener?.focus()
   }
 
   // Tells screen readers what a change did; the list itself is drawn again without any announcement.

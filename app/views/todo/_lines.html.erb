@@ -31,7 +31,8 @@
                 <progress class="todo-progress" max="<%= counts.open + counts.closed %>" value="<%= counts.closed %>" aria-hidden="true"></progress>
               </span>
             <% end %>
-            <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link" %>
+            <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link",
+                        data: { action: "click->todo#keepClick click->todo#openTicket" } %>
             <button type="button" class="todo-add-child" title="<%= l(:label_todo_add_child) %>"
                     aria-label="<%= l(:label_todo_add_child) %>"
                     data-action="click->todo#keepClick click->todo#addChild">+</button>

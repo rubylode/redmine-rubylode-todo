@@ -26,7 +26,9 @@ en:
   label_todo_reopen_ticket: "Reopen #%{id}"
   label_todo_nest_under: "Tab nest under #%{id}"
   label_todo_shortcuts: Shortcuts
-  label_todo_full_text: Full text
+  label_todo_full_text: Show full text
+  label_todo_cut_text: Cut text at 2 lines
+  text_todo_full_text_hint: Long subjects are cut at two lines. This shows them whole, and back again.
   text_todo_edit_keys: "Enter save, next line · ⌘Enter close · ↑↓ between lines · ⌥↑↓ move · ⌥→ nest, ⌥← outdent · Esc cancel"
   text_todo_composer_keys: "Enter next line · %{nest}⇧Tab outdent · Esc stop · paste several lines to add one per line"
   text_todo_announce_closed: "Closed #%{id}"
@@ -42,3 +44,6 @@ en:
   text_todo_key_cmd_enter: While editing, close or reopen the line.
   text_todo_key_paste: Paste several lines to add one per line. Indent two spaces to nest.
   text_todo_key_question: Open this list when no field has the focus.
+  label_todo_ticket: Ticket
+  text_todo_loading: Loading the ticket...
+  text_todo_announce_saved: "Saved #%{id}"

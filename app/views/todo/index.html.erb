@@ -4,6 +4,9 @@
   <%= javascript_include_tag "todo", plugin: "redmine_todo", type: "module" %>
 <% end %>
 <%= context_menu %>
+<%# What the ticket form in the modal needs: the editor toolbar for its text areas, and the date fields. %>
+<% heads_for_wiki_formatter %>
+<% include_calendar_headers_tags %>
 
 <h2><%= l(:label_todo) %></h2>
 
@@ -21,11 +24,15 @@
                     todo_announcements_value: { closed: l(:text_todo_announce_closed, id: "%{id}"),
                                                 reopened: l(:text_todo_announce_reopened, id: "%{id}"),
                                                 moved: l(:text_todo_announce_moved, id: "%{id}"),
-                                                created: l(:text_todo_announce_created, id: "%{id}") },
+                                                created: l(:text_todo_announce_created, id: "%{id}"),
+                                                saved: l(:text_todo_announce_saved, id: "%{id}") },
+                    todo_loading_value: l(:text_todo_loading),
                     todo_failure_value: l(:text_todo_request_failed) } do %>
   <div class="contextual">
     <a href="#" data-action="click->todo#showShortcuts"><%= l(:label_todo_shortcuts) %> ?</a> |
-    <a href="#" role="button" aria-pressed="false" data-action="click->todo#toggleFullText"><%= l(:label_todo_full_text) %></a> |
+    <a href="#" role="button" aria-pressed="false" title="<%= l(:text_todo_full_text_hint) %>"
+       data-todo-full-label="<%= l(:label_todo_full_text) %>" data-todo-cut-label="<%= l(:label_todo_cut_text) %>"
+       data-action="click->todo#toggleFullText"><%= l(:label_todo_full_text) %></a> |
     <a href="#" data-action="click->todo#collapseAll"><%= l(:label_todo_collapse_all) %></a> |
     <a href="#" data-action="click->todo#expandAll"><%= l(:label_todo_expand_all) %></a> |
     <% if @show_closed %>
@@ -60,5 +67,12 @@
       <% end %>
     </dl>
     <form method="dialog"><button class="todo-shortcuts-close"><%= l(:button_close) %></button></form>
+  </dialog>
+
+  <%# The ticket's own page, shown here: its card, and its edit form behind the Edit button. %>
+  <dialog class="todo-ticket-dialog" data-todo-target="ticketDialog" aria-label="<%= l(:label_todo_ticket) %>"
+          data-action="click->todo#closeTicketOnBackdrop close->todo#clearTicket submit->todo#submitTicket">
+    <button type="button" class="todo-ticket-close" aria-label="<%= l(:button_close) %>" data-action="click->todo#closeTicket">&times;</button>
+    <div class="todo-ticket-body" data-todo-target="ticketBody"></div>
   </dialog>
 <% end %>

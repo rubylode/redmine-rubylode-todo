@@ -101,6 +101,21 @@ class TodoPageTest < Redmine::IntegrationTest
     assert_select "dialog.todo-shortcuts"
   end
 
+  test "the ticket number opens the ticket in a modal, and the page loads what the ticket form needs" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    assert_select "li[data-ticket-id='#{@sibling.id}'] a.todo-ticket-link[href='/issues/#{@sibling.id}'][data-action*='todo#openTicket']"
+    assert_select "dialog.todo-ticket-dialog [data-todo-target='ticketBody']"
+    assert_select "head script[src*='jstoolbar']" # the editor toolbar of the ticket form's text areas
+    assert_select "head script", text: /datepickerOptions/ # the date fields
+  end
+
+  test "the full text switch says what it does" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    assert_select "a[data-action*='todo#toggleFullText'][data-todo-full-label='Show full text'][data-todo-cut-label='Cut text at 2 lines']", text: "Show full text"
+  end
+
   test "a member without the permission is refused" do
     Role.find(1).remove_permission!(:use_todo)
     log_user("jsmith", "jsmith")
