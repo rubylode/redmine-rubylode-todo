@@ -1,151 +1,126 @@
 # Rubylode To-do for Redmine
 
-A Redmine plugin that shows a project's tickets as a plain to-do list. Redmine 7 and up only. GPL v2 or later.
-An independent plugin, not made or endorsed by the Redmine project.
+[![tests](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml/badge.svg)](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml)
 
-Most of the time I just need a flat list: do A, do B, one nested item under B. Redmine makes every line a full
-ticket form. This plugin gives each project a To-do page where every line is a ticket, so a quick list takes seconds
+TL;DR: a To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
+
+Redmine 7 and up only. GPL v2 or later. An independent plugin, not made or endorsed by the Redmine project.
+
+I needed a flat list: do A, do B, one nested item under B. In Redmine that is three ticket forms and a dozen clicks,
+and you can't see the list while you build it. So each project now gets a To-do page. Quick things happen in the list,
 and anything bigger is one click away from the normal ticket edit.
 
 ![The to-do list: nested lines, progress per parent, closed lines crossed out](docs/screenshots/list.png)
 
-## Features
+## What it does
 
-- A To-do page in every project that enables the module. Every line is a ticket, nested to any depth by parent and subtask.
-- Add lines in seconds: type and press Enter, keep going with Enter, nest with Tab, or paste a whole outline.
-- Edit in place, with notes-app keys: Up and Down between lines, Alt+arrows to move or nest, Cmd+Enter to tick.
-- A checkbox closes and reopens tickets. Closing a parent closes what is below it, after one confirmation.
-- Drag a line by its grip onto another to nest it, or between lines to reorder. The order is shared by everyone on the project.
-- Fold and unfold lines. Every parent shows how many of the tickets below it are closed, with a small progress bar.
-- Narrow the list with Redmine's own ticket filters (status, tracker, assignee, dates, custom fields, and the rest).
-  Show closed tickets is the status filter. A match whose parent is filtered out stands at the top level.
-- Click a ticket number to open the ticket in a dialog, without leaving the list: the ticket's own card, with its
-  Edit button, the full edit form, notes and file uploads. Right click, Edit opens the same dialog with the form showing.
-  Saving closes the dialog and the list shows the change. Ctrl or Cmd click still opens the ticket page.
-- Redmine's own ticket tooltip on hover and its own context menu on right click (status, assignee, edit, and more).
-- Long subjects stop at two lines (Show full text shows them whole), `code`, **bold** and ~~strike~~ show as such, and the
-  detail after the first dash is lighter, so the headlines scan.
-- Key hints appear under a line while you edit or add one, and a Shortcuts list (or ?) shows them all.
-- Everything goes through the normal ticket save, so workflow, permissions, journals and notification mails stay Redmine's.
+- Type at the bottom and press Enter to create a ticket. Enter again adds the next line, Tab nests it under the line
+  above, and pasting a whole outline creates one ticket per line.
+- Click a line to edit its subject in place. Up and Down move between lines, Alt+arrows move or nest a line, and
+  Cmd+Enter ticks it.
+- The checkbox closes a ticket, or reopens it, and crosses the line out. Close a parent and the open tickets below it
+  close too, after one confirmation.
+- Drag a line by its grip onto another to nest it, or onto an edge to reorder. Everyone on the project sees the same order.
+- Parents fold, and show how many of their tickets are closed ("2 of 5") with a small progress bar.
+- Redmine's own ticket filters narrow the list. Show closed tickets is the status filter.
+- Click a ticket number and the ticket opens in a dialog over the list. Edit gives you the full form, with notes and
+  file uploads.
+- Hover a line for Redmine's ticket tooltip, right click for its context menu.
+- Long subjects stop at two lines (Show full text shows them whole). `code`, **bold** and ~~strike~~ show as such, and
+  the text after the first dash goes lighter, so the headlines scan.
+- Every change is a normal ticket save, so workflow, permissions, journals and notification mails stay Redmine's. The
+  mails still go out, so your watchers hear about every tick. That's on purpose.
 - No settings page, no extra gem, no JavaScript library.
-
-## Screenshots
-
-### Edit a line in place
-
-Click a line's text. Enter saves it and opens a new line below, as in a notes app. Key hints sit under the line.
-
-![Editing a line, with the key hints below it](docs/screenshots/editing.png)
-
-### Add lines
-
-Type at the bottom, or press **+** on a line to add a line under it. Tab nests a new line under the one above, Shift+Tab
-moves it back out. Paste several lines to create one ticket per line.
-
-![Adding a line under another](docs/screenshots/adding.png)
-
-### Redmine's ticket tooltip
-
-Hover a line for the ticket's tooltip, shown beside the pointer.
-
-![The ticket tooltip beside the pointer](docs/screenshots/tooltip.png)
-
-### Redmine's own filters
-
-The same filters as the ticket list. The page keeps them when you tick, edit or move a line.
-
-![The filters panel above the list](docs/screenshots/filters.png)
-
-### A ticket in a dialog
-
-Click a ticket number. The ticket opens over the list, and Edit shows the full form. Saving brings you back to the list.
-
-![A ticket opened in a dialog over the list](docs/screenshots/ticket-dialog.png)
-
-### Right click
-
-Redmine's own context menu: status, tracker, assignee, watchers, edit, copy and more.
-
-![Redmine's context menu on a line](docs/screenshots/context-menu.png)
-
-### Shortcuts
-
-Press **?** (or use the Shortcuts link) for the list of keys.
-
-![The shortcuts list](docs/screenshots/shortcuts.png)
-
-## How it works
-
-- Lists a project's open tickets, children nested under their parent. Show closed tickets lists them crossed out.
-- Type a line at the bottom and press Enter to create a ticket (default tracker, status and priority, assigned to you).
-- Click a line's text to edit the subject. Escape cancels an edit. While editing: Up and Down go to the line above or
-  below, Alt+Up and Alt+Down move the line among its siblings, Alt+Right nests it under the line above, Alt+Left
-  moves it back out, and Cmd+Enter (Ctrl+Enter) closes or reopens it.
-- Paste several lines into the new-line box (or into a new line) to create one ticket per line. Two spaces or a tab
-  nest a line under the one above, and list markers (`- `, `* `, `1. `, `- [ ] `) are dropped. Up to 100 lines.
-- The checkbox closes the ticket, or reopens it. A closed line stays in place, crossed out, until you reload the page.
-  Closing a parent asks once before it closes the open tickets below it, and reopening one asks the same.
-- An arrow on a line with children folds it. Collapse all and Expand all are above the list. Folding is remembered per browser.
-- Drag a line by its grip onto the middle of another to make it a child. Drag to the top or bottom edge of a line to
-  reorder. The order is shared by everyone who can open the page.
-
-Every change goes through the normal ticket save, so workflow, permissions, journals and notification mails behave
-as for any edit.
-
-## Requirements
-
-- Redmine 7.0 or newer.
-- A database Redmine supports (SQLite, PostgreSQL, MySQL, MariaDB). The plugin adds one small table that keeps the line order.
 
 ## Installation
 
-The plugin's folder must be named `redmine_rubylode_todo`, the same as its id.
+Redmine 7.0 or newer, on any database Redmine supports. The plugin adds one small table for the line order. The folder
+must be named `redmine_rubylode_todo`, the same as the plugin id.
 
 1. Put the plugin in your Redmine's `plugins` folder:
 
        cd /path/to/redmine/plugins
        git clone https://github.com/rubylode/redmine-rubylode-todo.git redmine_rubylode_todo
 
-   Or download a release archive and unpack it as `plugins/redmine_rubylode_todo`.
-
-2. Create the table from the Redmine folder:
+2. Create the table:
 
        cd /path/to/redmine
        bundle exec rake redmine:plugins:migrate RAILS_ENV=production
 
-3. Restart Redmine (Passenger, Puma, or whatever serves it).
+3. Restart Redmine ([Passenger](https://www.phusionpassenger.com), [Puma](https://puma.io), whatever serves it).
 
 4. Allow it, as an administrator:
-   - Administration, Roles and permissions: tick **Use the to-do list** for the roles that should see the page.
-   - For new projects: Administration, Settings, Projects, tick **To-do** under *Default enabled modules for new projects*.
-   - For an existing project: Settings, Modules, tick **To-do**. Every project needs this once.
+   1. Administration, Roles and permissions: tick Use the to-do list for the roles that should see the page.
+   2. Administration, Settings, Projects: tick To-do under Default enabled modules for new projects.
+   3. Each existing project needs the module once (Settings, Modules). To do all of them at once:
 
-   To enable it on every existing project in one go, run in the Redmine folder:
+          bundle exec rails runner -e production 'Project.find_each { |project| project.enable_module!(:rubylode_todo) }'
 
-       bundle exec rails runner -e production 'Project.find_each { |project| project.enable_module!(:rubylode_todo) }'
+5. Open a project. A To-do tab now sits after Issues.
 
-5. Open a project: a **To-do** tab now sits after **Issues**.
-
-### Docker
-
-Mount or copy the plugin to `/usr/src/redmine/plugins/redmine_rubylode_todo` in the container, then run the migration
-inside it and restart the container:
+With [Docker](https://www.docker.com), mount or copy the plugin to `/usr/src/redmine/plugins/redmine_rubylode_todo`,
+then migrate inside the container and restart it:
 
     docker compose exec redmine bundle exec rake redmine:plugins:migrate RAILS_ENV=production
     docker compose restart redmine
 
-If the migration complains about a missing secret key, pass the one the container already uses, for example
+If the migration complains about a missing secret key, pass the one the container already uses:
 `docker compose exec -e SECRET_KEY_BASE="$SECRET_KEY_BASE" redmine ...`.
 
-### Upgrading
+To upgrade, `git pull`, run the migration again (it does nothing when there is nothing new) and restart.
 
-Update the folder (`git pull`), run the migration command again (it does nothing when there is nothing new), and restart Redmine.
-
-### Removing
+To remove it, run the line below, delete the folder and restart. This drops the order table. Tickets are not touched.
 
     bundle exec rake redmine:plugins:migrate NAME=redmine_rubylode_todo VERSION=0 RAILS_ENV=production
 
-Then delete the plugin folder and restart. This drops the order table. Tickets are not touched.
+## Screenshots
+
+Click a line to edit it. Enter saves and opens a new line below, like a notes app, with the keys listed underneath.
+
+![Editing a line, with the key hints below it](docs/screenshots/editing.png)
+
+Press + on a line to add a line under it. Tab nests a new line under the one above, Shift+Tab moves it back out.
+
+![Adding a line under another](docs/screenshots/adding.png)
+
+Hover for the ticket's tooltip, shown beside the pointer.
+
+![The ticket tooltip beside the pointer](docs/screenshots/tooltip.png)
+
+The filters are the ones the ticket list has, and the page keeps them while you tick, edit or move lines.
+
+![The filters panel above the list](docs/screenshots/filters.png)
+
+Click a ticket number to read or edit the ticket without leaving the list.
+
+![A ticket opened in a dialog over the list](docs/screenshots/ticket-dialog.png)
+
+Right click for Redmine's own menu: status, tracker, assignee, watchers, edit, copy.
+
+![Redmine's context menu on a line](docs/screenshots/context-menu.png)
+
+Press ? for the keys.
+
+![The shortcuts list](docs/screenshots/shortcuts.png)
+
+## Details
+
+- Pasting several lines creates one ticket per line, up to 100. Two spaces or a tab nest a line under the one above, and
+  list markers (`- `, `* `, `1. `, `- [ ] `) are dropped.
+- New tickets get the default tracker, status and priority, and are assigned to you.
+- A closed line stays in place, crossed out, until you reload the page. Reopening a parent asks the same question as
+  closing one.
+- Escape cancels an edit. Alt+Right nests the line you're editing under the one above, Alt+Left moves it back out.
+- Collapse all and Expand all sit above the list. Folding is remembered per browser.
+- Drop a line on the middle of another to make it a child, on the top or bottom edge to reorder.
+
+## What's missing
+
+- English only. The strings live in `config/locales/en.yml`; translations are welcome.
+- There is no undo.
+- Dragging needs a mouse. On touch screens the grip is hidden.
+- Links inside the ticket dialog (another ticket, a wiki page) leave the list.
+- Drag and drop, the tooltip and the right-click menu have no automated test. Everything that changes a ticket does.
 
 ## Try it
 
@@ -156,23 +131,24 @@ A throwaway Redmine 7 runs from this folder, with the repository mounted as the 
     docker compose restart redmine
     open http://localhost:3007
 
-Sign in as admin (password admin, change it on first login), load the default data under Administration, create
-a project, enable the To-do module and grant the permission. Wipe it with `docker compose down -v`.
+Sign in as admin (password admin, change it on first login), load the default data under Administration, create a
+project, enable the To-do module and grant the permission. Wipe it with `docker compose down -v`.
 
 ## Tests
 
     bin/test                                      all integration tests
     bin/test test/integration/todo_moving_test.rb one file
 
-They run in a Redmine 7 image with its test gems (`docker/test.Dockerfile`), sending the requests a browser would
-send and checking the tickets and the stored order. The browser parts (drag feel, tooltip, right-click menu) have no
-automated test; check them by hand in the throwaway Redmine:
+They run in a Redmine 7 image with its test gems (`docker/test.Dockerfile`), send the requests a browser would send,
+and check the tickets and the stored order. For the browser parts, try these in the throwaway Redmine:
 
-- add a line, edit it, check it, uncheck it (show closed tickets to find it)
-- check a parent that has open children: the confirmation names the count, Cancel changes nothing
-- drag a line onto another, then to the top edge of a line, then out of its parent
-- hover a line for the tooltip, right-click for the menu
-- open a ticket in the dialog, change the subject, save
+1. Add a line, edit it, tick it, untick it (show closed tickets to find it).
+2. Tick a parent that has open children. The confirmation names the count, and Cancel changes nothing.
+3. Drag a line onto another, then to the top edge of a line, then out of its parent.
+4. Hover a line for the tooltip, right click for the menu.
+5. Open a ticket in the dialog, change the subject, save.
+
+Pull Requests are welcome!
 
 ## License
 
