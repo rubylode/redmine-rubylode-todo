@@ -2,19 +2,15 @@ class TodoController < ApplicationController
   before_action :find_project_by_project_id, :authorize
   before_action :find_ticket, only: %i[update close reopen move]
 
+  include QueriesHelper
   helper :issues
+  helper :queries
   helper :todo
 
   def index
-    @show_closed = params[:show_closed] == "1"
-    tickets = Issue.visible.where(project_id: @project.id)
-    unless @show_closed
-      # Tickets closed during this visit stay on the page, crossed out, until it is reloaded.
-      kept_ids = params[:keep].to_s.split(",").map(&:to_i)
-      tickets = tickets.where(id: tickets.open.pluck(:id) | kept_ids)
-    end
-    tickets = tickets.includes(:status, :tracker, :priority, :assigned_to)
-    @todo_tree = TodoTree.new(tickets.order(:id).to_a, descendant_counts)
+    retrieve_query(IssueQuery, false)
+    @show_closed = @query.filters["status_id"]&.fetch(:operator, nil) != "o"
+    @todo_tree = TodoTree.new(listed_tickets, descendant_counts)
   end
 
   def create
@@ -125,6 +121,17 @@ class TodoController < ApplicationController
     siblings = TodoPosition.sort(Issue.visible.where(project_id: @project.id, parent_id: parent&.id).to_a) - [ticket]
     insert_at = before && siblings.index(before) || siblings.size
     TodoPosition.place(siblings.insert(insert_at, ticket))
+  end
+
+  # The tickets the filters match, in this project only. Tickets closed during this visit stay on the page,
+  # crossed out, until it is reloaded, whatever the filters say.
+  def listed_tickets
+    return [] unless @query.valid?
+
+    kept_ids = params[:keep].to_s.split(",").map(&:to_i)
+    ids = @query.base_scope.where(project_id: @project.id).pluck(:id) | kept_ids
+    Issue.visible.where(project_id: @project.id, id: ids)
+         .includes(:status, :tracker, :priority, :assigned_to).order(:id).to_a
   end
 
   def descendant_counts

@@ -13,7 +13,7 @@
 <%= tag.div class: "todo",
             data: { controller: "todo",
                     todo_lines_path_value: project_todo_lines_path(@project),
-                    todo_page_url_value: project_todo_path(@project, show_closed: (1 if @show_closed)),
+                    todo_page_url_value: project_todo_path(@project, todo_query_params(@query)),
                     todo_confirm_close_subtree_value: l(:text_todo_confirm_close_subtree, count: "%{count}"),
                     todo_confirm_reopen_subtree_value: l(:text_todo_confirm_reopen_subtree, count: "%{count}"),
                     todo_composer_placeholder_value: l(:text_todo_composer_hint),
@@ -36,11 +36,13 @@
     <a href="#" data-action="click->todo#collapseAll"><%= l(:label_todo_collapse_all) %></a> |
     <a href="#" data-action="click->todo#expandAll"><%= l(:label_todo_expand_all) %></a> |
     <% if @show_closed %>
-      <%= link_to l(:label_todo_hide_closed), project_todo_path(@project) %>
+      <%= link_to l(:label_todo_hide_closed), project_todo_path(@project, todo_status_params(@query, false)) %>
     <% else %>
-      <%= link_to l(:label_todo_show_closed), project_todo_path(@project, show_closed: 1) %>
+      <%= link_to l(:label_todo_show_closed), project_todo_path(@project, todo_status_params(@query, true)) %>
     <% end %>
   </div>
+
+  <%= render "todo/filters" %>
 
   <p class="todo-message flash error" role="alert" hidden data-todo-target="message"></p>
   <div class="todo-live" role="status" aria-live="polite" data-todo-target="live"></div>

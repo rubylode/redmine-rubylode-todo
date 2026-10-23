@@ -5,6 +5,8 @@ class TodoPageTest < Redmine::IntegrationTest
            :projects_trackers, :enabled_modules, :issue_statuses, :issues, :enumerations,
            :workflows
 
+  SHOW_ANY_STATUS = { set_filter: "1", f: ["status_id"], op: { status_id: "*" }, v: { status_id: [""] } }.freeze
+
   def setup
     @project = Project.find(1)
     @project.enable_module!(:todo)
@@ -38,8 +40,45 @@ class TodoPageTest < Redmine::IntegrationTest
 
   test "closed tickets show crossed out when the toggle is on" do
     log_user("jsmith", "jsmith")
-    get "/projects/ecookbook/todo", params: { show_closed: "1" }
+    get "/projects/ecookbook/todo", params: SHOW_ANY_STATUS
     assert_select "li.todo-line-closed[data-ticket-id='#{@closed.id}']", text: /Old chore/
+  end
+
+  test "the page carries Redmine's filter form, with the open-tickets filter set by default" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    assert_select "form#query_form fieldset#filters #add_filter_select"
+    assert_select "form#query_form input[name=set_filter][value='1']"
+    assert_select "script", text: /addFilter\("status_id", "o"/
+  end
+
+  test "a filter narrows the list, and a match whose parent is filtered out stands at the top level" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo", params: { set_filter: "1", f: ["subject"], op: { subject: "~" }, v: { subject: ["train"] } }
+    assert_response :success
+    assert_select "ul.todo-list > li[data-ticket-id='#{@child.id}']", text: /Book the train/
+    assert_select "li[data-ticket-id='#{@sibling.id}']", count: 0
+    assert_select "li[data-ticket-id='#{@parent.id}']", count: 0
+    assert_select "script", text: /addFilter\("subject", "~"/
+  end
+
+  test "an invalid filter shows Redmine's error and lists nothing" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo", params: { set_filter: "1", f: ["due_date"], op: { due_date: "><" }, v: { due_date: ["x"] } }
+    assert_response :success
+    assert_select ".flash.error"
+    assert_select "li.todo-line", count: 0
+  end
+
+  test "the hide closed link keeps the other filters" do
+    # With no status filter every status shows, so the link offers to hide the closed ones.
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo", params: { set_filter: "1", f: ["subject"], op: { subject: "~" }, v: { subject: ["train"] } }
+    link = css_select(".contextual a").find { |element| element.text =~ /Hide closed/ }
+    query = Rack::Utils.parse_nested_query(URI(link["href"]).query)
+    assert_equal "o", query["op"]["status_id"]
+    assert_equal "~", query["op"]["subject"]
+    assert_equal ["train"], query["v"]["subject"]
   end
 
   test "a ticket asked to be kept shows crossed out in its place although closed tickets are hidden" do
@@ -71,7 +110,7 @@ class TodoPageTest < Redmine::IntegrationTest
   test "the close checkbox is outside the element Redmine's context menu script treats as a row" do
     # That script ticks and unticks every checkbox inside such an element to mirror its selection.
     log_user("jsmith", "jsmith")
-    get "/projects/ecookbook/todo", params: { show_closed: "1" }
+    get "/projects/ecookbook/todo", params: SHOW_ANY_STATUS
     assert_select ".hascontextmenu .todo-checkbox", count: 0
     assert_select ".hascontextmenu .todo-fold", count: 0
     assert_select ".hascontextmenu input[type=checkbox]", count: 4 # only the hidden selection box of each line

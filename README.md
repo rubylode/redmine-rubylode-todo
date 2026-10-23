@@ -13,6 +13,8 @@ and anything bigger is one click away from the normal ticket edit.
 - Edit in place, with notes-app keys: Up and Down between lines, Alt+arrows to move or nest, Cmd+Enter to tick.
 - A checkbox closes and reopens tickets. Closing a parent closes what is below it, after one confirmation.
 - Drag a line onto another to nest it, or between lines to reorder. The order is shared by everyone on the project.
+- Narrow the list with Redmine's own ticket filters (status, tracker, assignee, dates, custom fields, and the rest). Show closed
+  tickets is the status filter. A match whose parent is filtered out stands at the top level.
 - Fold and unfold lines. Every parent shows how many of the tickets below it are closed, with a small progress bar.
 - Long subjects stop at two lines (Show full text shows them whole), `code`, **bold** and ~~strike~~ show as such, and the detail
   after the first dash is lighter, so the headlines scan. Lines are dragged by a grip, so selecting text never drags.

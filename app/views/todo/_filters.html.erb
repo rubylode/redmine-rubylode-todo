@@ -1,0 +1,21 @@
+<%# Redmine's own filter form for tickets, so the list narrows the way the ticket list does. %>
+<% narrowed = @query.filters.except("status_id").any? || !@query.valid? %>
+<%= form_tag(project_todo_path(@project), method: :get, id: "query_form", class: "todo-filters") do %>
+  <%= hidden_field_tag "set_filter", "1" %>
+  <fieldset id="filters" class="collapsible <%= narrowed ? "" : "collapsed" %>">
+    <legend onclick="toggleFieldset(this);" class="icon icon-<%= narrowed ? "expanded" : "collapsed" %>">
+      <%= sprite_icon(narrowed ? "angle-down" : "angle-right", rtl: !narrowed) %>
+      <%= l(:label_filter_plural) %>
+    </legend>
+    <div style="<%= "display: none;" unless narrowed %>">
+      <%= render "queries/filters", query: @query %>
+      <p class="buttons">
+        <%= submit_tag l(:button_apply), name: nil, class: "icon icon-checked" %>
+        <%= link_to l(:button_clear), project_todo_path(@project), class: "icon icon-reload" %>
+      </p>
+    </div>
+  </fieldset>
+<% end %>
+<% unless @query.valid? %>
+  <div class="flash error" role="alert"><%= @query.errors.full_messages.to_sentence %></div>
+<% end %>
