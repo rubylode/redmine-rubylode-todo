@@ -43,7 +43,7 @@ and anything bigger is one click away from the normal ticket edit.
   the text after the first dash goes lighter, so the headlines scan.
 - Every change is a normal ticket save, so workflow, permissions, journals and notification mails stay Redmine's. The
   mails still go out, so your watchers hear about every tick. That's on purpose.
-- No settings page, no extra gem, no JavaScript library.
+- No extra gem, no JavaScript library. One settings page, for the defaults of new lines.
 
 ## Installation
 
