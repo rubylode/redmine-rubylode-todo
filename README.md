@@ -53,6 +53,8 @@ must be named `redmine_rubylode_todo`, the same as the plugin id.
        cd /path/to/redmine/plugins
        git clone https://github.com/rubylode/redmine-rubylode-todo.git redmine_rubylode_todo
 
+   Or unpack a [release archive](https://github.com/rubylode/redmine-rubylode-todo/releases) there, as `redmine_rubylode_todo`.
+
 2. Create the table:
 
        cd /path/to/redmine
