@@ -4,8 +4,6 @@
 
 TL;DR: a To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
 
-Redmine 7 and up only. GPL v2 or later. An independent plugin, not made or endorsed by the Redmine project.
-
 I needed a flat list: do A, do B, one nested item under B. In Redmine that is three ticket forms and a dozen clicks,
 and you can't see the list while you build it. So each project now gets a To-do page. Quick things happen in the list,
 and anything bigger is one click away from the normal ticket edit.
