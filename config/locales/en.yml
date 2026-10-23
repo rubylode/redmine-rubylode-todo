@@ -47,3 +47,14 @@ en:
   label_todo_ticket: Ticket
   text_todo_loading: Loading the ticket...
   text_todo_announce_saved: "Saved #%{id}"
+  text_todo_settings_intro: "Defaults for a line added on the To-do page. A default that does not fit a project or a person is skipped, and the ticket is still created."
+  label_todo_settings_nobody: Nobody
+  label_todo_settings_author: The person adding the line
+  label_todo_settings_default_tracker: "Redmine's default (the first tracker the person may use)"
+  label_todo_settings_default_status: "The tracker's default status"
+  label_todo_settings_default_priority: "Redmine's default priority"
+  label_todo_settings_no_date: Leave empty
+  text_todo_settings_assignee_hint: "A fixed user or group is used where the project allows assigning to them."
+  text_todo_settings_version_hint: "The name of an open version. Used in each project that has a version with exactly this name."
+  text_todo_settings_category_hint: "The name of a category. Used in each project that has one with exactly this name."
+  text_todo_settings_due_hint: "Days after today. Leave empty for no due date."

@@ -8,12 +8,14 @@ Contents:
 
 - [What it does](#what-it-does)
 - [Installation](#installation)
+- [Settings](#settings)
 - [Screenshots](#screenshots)
 - [Details](#details)
 - [What's missing](#whats-missing)
 - [Try it](#try-it)
 - [Tests](#tests)
 - [License](#license)
+- [Disclaimer](#disclaimer)
 
 I needed a flat list: do A, do B, one nested item under B. In Redmine that is three ticket forms and a dozen clicks,
 and you can't see the list while you build it. So each project now gets a To-do page. Quick things happen in the list,
@@ -86,6 +88,23 @@ To remove it, run the line below, delete the folder and restart. This drops the 
 
     bundle exec rake redmine:plugins:migrate NAME=redmine_rubylode_todo VERSION=0 RAILS_ENV=production
 
+## Settings
+
+New lines get Redmine's own defaults, and the person adding the line is the assignee. To change that, open
+Administration, Plugins, Rubylode To-do, Configure. One set of defaults applies to every project:
+
+- Assignee: nobody, the person adding the line (the default), or a fixed user or group.
+- Tracker, status and priority.
+- Target version and category, by name. A project uses the default when it has an open version, or a category, with
+  exactly that name.
+- Start date (today) and due date (a number of days after today).
+
+A default that doesn't fit is skipped, and the ticket is still created. That covers a status the workflow doesn't allow
+for a new ticket, a closed version, a field the tracker has disabled and a field the person's role can't edit. A fixed
+assignee is used only where the project allows assigning to them, and a group only when Redmine allows assigning to groups.
+
+![The settings page](docs/screenshots/settings.png)
+
 ## Screenshots
 
 Click a line to edit it. Enter saves and opens a new line below, like a notes app, with the keys listed underneath.
@@ -120,7 +139,7 @@ Press ? for the keys.
 
 - Pasting several lines creates one ticket per line, up to 100. Two spaces or a tab nest a line under the one above, and
   list markers (`- `, `* `, `1. `, `- [ ] `) are dropped.
-- New tickets get the default tracker, status and priority, and are assigned to you.
+- New tickets get Redmine's default tracker, status and priority and are assigned to you, unless the settings say otherwise.
 - A closed line stays in place, crossed out, until you reload the page. Reopening a parent asks the same question as
   closing one.
 - Escape cancels an edit. Alt+Right nests the line you're editing under the one above, Alt+Left moves it back out.
@@ -169,3 +188,13 @@ Pull Requests are welcome!
 GNU General Public License, version 2 or (at your option) any later version, the same as Redmine. See `LICENSE`.
 
 Copyright (C) 2026 Nick Gorbikoff. Each Ruby file carries the same short notice Redmine puts on its own.
+
+## Disclaimer
+
+Use it at your own risk. It comes with no warranty of any kind, as the license says: the software is provided "as is",
+without any promise that it works, that it fits your purpose or that it's free of bugs. I'm not liable for any damage,
+data loss or downtime that comes from using it, installing it or removing it.
+
+The plugin creates, edits, closes and reorders tickets in your Redmine, and adds one table to your database. Before you
+install or upgrade it, back up your Redmine database, and try it on a test instance first. I've tested it on Redmine
+7.0.2 and the 7.0 stable branch, and nothing else.

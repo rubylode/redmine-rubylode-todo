@@ -1,0 +1,55 @@
+<%# Defaults for a line added on the To-do page. Redmine wraps this in the plugin's settings form. %>
+<%
+  people = User.active.sorted.to_a
+  people += Group.givable.sorted.to_a if Setting.issue_group_assignment?
+  assignee_choices = [[l(:label_todo_settings_nobody), ""], [l(:label_todo_settings_author), "author"]] +
+                     people.map { |person| [person.name, person.id.to_s] }
+%>
+<p><%= l(:text_todo_settings_intro) %></p>
+
+<div class="tabular settings">
+  <p>
+    <label for="settings_assignee"><%= l(:field_assigned_to) %></label>
+    <%= select_tag "settings[assignee]", options_for_select(assignee_choices, settings["assignee"].to_s), id: "settings_assignee" %>
+    <em class="info"><%= l(:text_todo_settings_assignee_hint) %></em>
+  </p>
+  <p>
+    <label for="settings_tracker_id"><%= l(:field_tracker) %></label>
+    <%= select_tag "settings[tracker_id]",
+                   options_for_select([[l(:label_todo_settings_default_tracker), ""]] + Tracker.sorted.map { |tracker| [tracker.name, tracker.id.to_s] }, settings["tracker_id"].to_s),
+                   id: "settings_tracker_id" %>
+  </p>
+  <p>
+    <label for="settings_status_id"><%= l(:field_status) %></label>
+    <%= select_tag "settings[status_id]",
+                   options_for_select([[l(:label_todo_settings_default_status), ""]] + IssueStatus.sorted.map { |status| [status.name, status.id.to_s] }, settings["status_id"].to_s),
+                   id: "settings_status_id" %>
+  </p>
+  <p>
+    <label for="settings_priority_id"><%= l(:field_priority) %></label>
+    <%= select_tag "settings[priority_id]",
+                   options_for_select([[l(:label_todo_settings_default_priority), ""]] + IssuePriority.active.sorted.map { |priority| [priority.name, priority.id.to_s] }, settings["priority_id"].to_s),
+                   id: "settings_priority_id" %>
+  </p>
+  <p>
+    <label for="settings_version_name"><%= l(:field_fixed_version) %></label>
+    <%= text_field_tag "settings[version_name]", settings["version_name"], id: "settings_version_name", size: 30 %>
+    <em class="info"><%= l(:text_todo_settings_version_hint) %></em>
+  </p>
+  <p>
+    <label for="settings_category_name"><%= l(:field_category) %></label>
+    <%= text_field_tag "settings[category_name]", settings["category_name"], id: "settings_category_name", size: 30 %>
+    <em class="info"><%= l(:text_todo_settings_category_hint) %></em>
+  </p>
+  <p>
+    <label for="settings_start_date"><%= l(:field_start_date) %></label>
+    <%= select_tag "settings[start_date]",
+                   options_for_select([[l(:label_todo_settings_no_date), ""], [l(:label_today), "today"]], settings["start_date"].to_s),
+                   id: "settings_start_date" %>
+  </p>
+  <p>
+    <label for="settings_due_in_days"><%= l(:field_due_date) %></label>
+    <%= number_field_tag "settings[due_in_days]", settings["due_in_days"], id: "settings_due_in_days", min: 0, size: 4 %>
+    <em class="info"><%= l(:text_todo_settings_due_hint) %></em>
+  </p>
+</div>

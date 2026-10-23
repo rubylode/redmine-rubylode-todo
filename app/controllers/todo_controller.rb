@@ -42,7 +42,7 @@ class TodoController < ApplicationController
     ticket.tracker = tracker
     ticket.status = ticket.tracker.default_status
     ticket.priority = IssuePriority.default || IssuePriority.active.first
-    ticket.assigned_to = User.current if ticket.assignable_users.include?(User.current)
+    TodoNewLineDefaults.new(Setting.plugin_redmine_rubylode_todo).apply(ticket, User.current)
 
     parent = project_ticket_or_nil(params[:parent_id])
     before = project_ticket_or_nil(params[:before_id])

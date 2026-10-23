@@ -22,7 +22,7 @@ Redmine::Plugin.register :redmine_rubylode_todo do
   author "Rubylode"
   author_url "https://github.com/rubylode"
   description "A to-do list over a project's tickets: nested lines, checkboxes, drag and drop, keyboard editing"
-  version "1.0.0"
+  version "1.1.0"
   requires_redmine version_or_higher: "7.0.0"
 
   project_module :rubylode_todo do
@@ -31,4 +31,9 @@ Redmine::Plugin.register :redmine_rubylode_todo do
 
   menu :project_menu, :rubylode_todo, { controller: "todo", action: "index" },
        caption: :label_todo, after: :issues, param: :project_id
+
+  # The defaults a new line gets. Saved from Administration, Plugins, Configure.
+  settings default: { "assignee" => "author", "tracker_id" => "", "status_id" => "", "priority_id" => "",
+                      "version_name" => "", "category_name" => "", "start_date" => "", "due_in_days" => "" },
+           partial: "settings/rubylode_todo"
 end
