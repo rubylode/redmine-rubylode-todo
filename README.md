@@ -4,9 +4,22 @@
 
 TL;DR: a To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
 
+Contents:
+
+- [What it does](#what-it-does)
+- [Installation](#installation)
+- [Screenshots](#screenshots)
+- [Details](#details)
+- [What's missing](#whats-missing)
+- [Try it](#try-it)
+- [Tests](#tests)
+- [License](#license)
+
 I needed a flat list: do A, do B, one nested item under B. In Redmine that is three ticket forms and a dozen clicks,
 and you can't see the list while you build it. So each project now gets a To-do page. Quick things happen in the list,
 and anything bigger is one click away from the normal ticket edit.
+
+![A short session on the To-do page: add a line, add a child, hover for the tooltip, tick, open a ticket, fold](docs/demo/workflow.gif)
 
 ![The to-do list: nested lines, progress per parent, closed lines crossed out](docs/screenshots/list.png)
 
@@ -116,7 +129,8 @@ Press ? for the keys.
 
 - English only. The strings live in `config/locales/en.yml`; translations are welcome.
 - There is no undo.
-- Dragging needs a mouse. On touch screens the grip is hidden.
+- It's built for a desktop browser. The phone experience isn't good (the grip is hidden on touch screens, so no
+  dragging), and there are mobile apps that do this better.
 - Links inside the ticket dialog (another ticket, a wiki page) leave the list.
 - Drag and drop, the tooltip and the right-click menu have no automated test. Everything that changes a ticket does.
 
