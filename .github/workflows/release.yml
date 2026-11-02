@@ -59,14 +59,16 @@ jobs:
             entry = changelog[/^##\s+\[?#{Regexp.escape(version)}\]?.*?\n(.*?)(?=^##\s|\z)/m, 1].to_s.strip
             File.write("release-notes.md", entry.empty? ? "Release #{version}." : entry + "\n")
             File.open(ENV.fetch("GITHUB_ENV"), "a") { |file| file.puts("RELEASE_ARCHIVE=#{archive}") }
-            puts "built #{archive}"
+            require "digest"
+            File.write("#{archive}.sha256", "#{Digest::SHA256.file(archive).hexdigest}  #{archive}\n")
+            puts "built #{archive} and #{archive}.sha256"
           '
-          sha256sum "$RELEASE_ARCHIVE" | tee "$RELEASE_ARCHIVE.sha256"
 
       - name: Publish the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          ls -l "$RELEASE_ARCHIVE" "$RELEASE_ARCHIVE.sha256"
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "$RELEASE_ARCHIVE" "$RELEASE_ARCHIVE.sha256" --clobber
             gh release edit "$RELEASE_TAG" --notes-file release-notes.md
