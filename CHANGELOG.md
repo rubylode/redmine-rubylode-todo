@@ -4,6 +4,12 @@ All notable changes to this plugin. The format follows [Keep a Changelog](https:
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-02
+
+### Added
+
+- The plugin shows its project address on Administration, Plugins, and its name, author and version are the ones to list on redmine.org, so "Check for updates" can recognise it. The text for the listing is in `docs/redmine-org-listing.md`.
+
 ### Changed
 
 - The README no longer says the plugin has no settings page.

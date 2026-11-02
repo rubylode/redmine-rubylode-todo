@@ -21,8 +21,9 @@ Redmine::Plugin.register :redmine_rubylode_todo do
   name "Rubylode To-do"
   author "Rubylode"
   author_url "https://github.com/rubylode"
+  url "https://github.com/rubylode/redmine-rubylode-todo"
   description "A to-do list over a project's tickets: nested lines, checkboxes, drag and drop, keyboard editing"
-  version "1.1.0"
+  version "1.1.1"
   requires_redmine version_or_higher: "7.0.0"
 
   project_module :rubylode_todo do
