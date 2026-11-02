@@ -1,6 +1,6 @@
 # To-do list for Redmine
 
-Ticket #1612. Redmine 7 and up only. Status: draft, waiting for review.
+Redmine 7 and up only. Status: draft, waiting for review.
 
 TL;DR: a To-do page per project that shows its tickets as a plain nested list, and keeps every change inside Redmine's own ticket save.
 

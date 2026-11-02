@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml/badge.svg)](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml)
 
-TL;DR: a To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
+A To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
 
 Contents:
 
@@ -14,8 +14,8 @@ Contents:
 - [What's missing](#whats-missing)
 - [Try it](#try-it)
 - [Tests](#tests)
+- [Releasing](#releasing)
 - [License](#license)
-- [Disclaimer](#disclaimer)
 
 I needed a flat list: do A, do B, one nested item under B. In Redmine that is three ticket forms and a dozen clicks,
 and you can't see the list while you build it. So each project now gets a To-do page. Quick things happen in the list,
@@ -151,7 +151,7 @@ Press ? for the keys.
 - English only. The strings live in `config/locales/en.yml`; translations are welcome.
 - There is no undo.
 - It's built for a desktop browser. The phone experience isn't good (the grip is hidden on touch screens, so no
-  dragging), and there are mobile apps that do this better.
+  dragging).
 - Links inside the ticket dialog (another ticket, a wiki page) leave the list.
 - Drag and drop, the tooltip and the right-click menu have no automated test. Everything that changes a ticket does.
 
@@ -191,16 +191,9 @@ The text to paste when listing the plugin on www.redmine.org, and how to read th
 
 ## License
 
-GNU General Public License, version 2 or (at your option) any later version, the same as Redmine. See `LICENSE`.
+GPL v2 or later, the same as Redmine. See `LICENSE`.
 
-Copyright (C) 2026 Nick Gorbikoff. Each Ruby file carries the same short notice Redmine puts on its own.
+Copyright (C) 2026  Nick Gorbikoff. Each Ruby file carries the same short notice Redmine puts on its own.
 
-## Disclaimer
-
-Use it at your own risk. It comes with no warranty of any kind, as the license says: the software is provided "as is",
-without any promise that it works, that it fits your purpose or that it's free of bugs. I'm not liable for any damage,
-data loss or downtime that comes from using it, installing it or removing it.
-
-The plugin creates, edits, closes and reorders tickets in your Redmine, and adds one table to your database. Before you
-install or upgrade it, back up your Redmine database, and try it on a test instance first. I've tested it on Redmine
-7.0.2 and the 7.0 stable branch, and nothing else.
+No warranty, as the GPL says. The plugin creates, edits, closes and reorders tickets and adds one table, so try it on a
+copy of your tracker first. I tested it on Redmine 7.0.2 and 7.0-stable, and nothing else.

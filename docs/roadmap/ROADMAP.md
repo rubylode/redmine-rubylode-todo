@@ -1,7 +1,5 @@
 # Roadmap
 
-Tracked in the `redmine-todo` project on the home tracker; the feature description is ticket #1612.
-
 ## Planned
 
 1. Each item is a ticket; the item text is the ticket subject.
