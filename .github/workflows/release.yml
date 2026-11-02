@@ -1,0 +1,75 @@
+name: release
+
+# A version tag (v1.2.3) runs the tests on every supported Redmine and Ruby, then builds the plugin zip and publishes a GitHub
+# release with the changelog entry as its notes. "Run workflow" with a tag name builds the release for a tag that already exists.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release, for example v1.2.3"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
+  release:
+    name: Build and publish the release
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+
+      - name: Check the tag against the plugin version and the changelog
+        run: |
+          ruby -e '
+            tag = ENV.fetch("RELEASE_TAG")
+            version = File.read("init.rb")[/^\s*version\s+["\x27]([^"\x27]+)["\x27]/, 1]
+            abort "no version in init.rb" unless version
+            abort "tag #{tag} does not match init.rb version #{version}" unless tag == "v#{version}"
+            changelog = File.read("CHANGELOG.md")
+            abort "CHANGELOG.md has no entry for #{version}" unless changelog.match?(/^##\s+\[?#{Regexp.escape(version)}\]?/)
+            puts "tag #{tag} matches version #{version} and the changelog"
+          '
+
+      - name: Build the zip and the release notes
+        run: |
+          ruby -e '
+            tag = ENV.fetch("RELEASE_TAG")
+            version = tag.delete_prefix("v")
+            plugin = File.read("init.rb")[/Redmine::Plugin\.register\s+:(\w+)/, 1] or abort "no plugin id in init.rb"
+            archive = "#{plugin}-#{version}.zip"
+            system("git", "archive", "--format=zip", "--prefix=#{plugin}/", "-o", archive, tag, exception: true)
+            changelog = File.read("CHANGELOG.md")
+            entry = changelog[/^##\s+\[?#{Regexp.escape(version)}\]?.*?\n(.*?)(?=^##\s|\z)/m, 1].to_s.strip
+            File.write("release-notes.md", entry.empty? ? "Release #{version}." : entry + "\n")
+            File.open(ENV.fetch("GITHUB_ENV"), "a") { |file| file.puts("RELEASE_ARCHIVE=#{archive}") }
+            puts "built #{archive}"
+          '
+          sha256sum "$RELEASE_ARCHIVE" | tee "$RELEASE_ARCHIVE.sha256"
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$RELEASE_ARCHIVE" "$RELEASE_ARCHIVE.sha256" --clobber
+            gh release edit "$RELEASE_TAG" --notes-file release-notes.md
+          else
+            gh release create "$RELEASE_TAG" "$RELEASE_ARCHIVE" "$RELEASE_ARCHIVE.sha256" --verify-tag --title "$RELEASE_TAG" --notes-file release-notes.md
+          fi

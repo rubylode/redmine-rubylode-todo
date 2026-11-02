@@ -4,7 +4,9 @@ name: tests
 # Redmine's source, the plugin in plugins/redmine_rubylode_todo, SQLite, then the plugin's test task.
 on:
   push:
+    branches: ["**"]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -50,3 +52,21 @@ jobs:
       - name: Run the plugin's tests
         working-directory: redmine
         run: bundle exec rake redmine:plugins:test:integration NAME=redmine_rubylode_todo
+
+  # A snapshot of what a release would contain, built from the commit that just passed on main.
+  package:
+    name: Build the plugin zip
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the zip
+        run: git archive --format=zip --prefix=redmine_rubylode_todo/ -o redmine_rubylode_todo-${{ github.sha }}.zip HEAD
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: redmine_rubylode_todo-${{ github.sha }}
+          path: redmine_rubylode_todo-${{ github.sha }}.zip
+          retention-days: 14
