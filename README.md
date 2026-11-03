@@ -1,5 +1,7 @@
 # Rubylode To-do for Redmine
 
+<p><img src="docs/thumbnail.png" alt="Rubylode To-do plugin" width="160"></p>
+
 [![tests](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml/badge.svg)](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml)
 
 A To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
