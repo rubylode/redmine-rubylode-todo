@@ -11,19 +11,6 @@
 
 A To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
 
-Contents:
-
-- [What it does](#what-it-does)
-- [Installation](#installation)
-- [Settings](#settings)
-- [Screenshots](#screenshots)
-- [Details](#details)
-- [What's missing](#whats-missing)
-- [Try it](#try-it)
-- [Tests](#tests)
-- [Releasing](#releasing)
-- [License](#license)
-
 I needed a flat list: do A, do B, one nested item under B. In Redmine that is three ticket forms and a dozen clicks,
 and you can't see the list while you build it. So each project now gets a To-do page. Quick things happen in the list,
 and anything bigger is one click away from the normal ticket edit.
@@ -31,8 +18,6 @@ and anything bigger is one click away from the normal ticket edit.
 ![A short session on the To-do page: add a line, add a child, hover for the tooltip, tick, open a ticket, fold](docs/demo/workflow.gif)
 
 ![The to-do list: nested lines, progress per parent, closed lines crossed out](docs/screenshots/list.png)
-
-## What it does
 
 - Type at the bottom and press Enter to create a ticket. Enter again adds the next line, Tab nests it under the line
   above, and pasting a whole outline creates one ticket per line.
@@ -47,38 +32,25 @@ and anything bigger is one click away from the normal ticket edit.
   file uploads.
 - Hover a line for Redmine's ticket tooltip, right click for its context menu.
 - Long subjects stop at two lines (Show full text shows them whole). `code`, **bold** and ~~strike~~ show as such, and
-  the text after the first dash goes lighter, so the headlines scan.
+  the text after the first em dash (" — ") goes lighter, so the headlines scan.
 - Every change is a normal ticket save, so workflow, permissions, journals and notification mails stay Redmine's. The
   mails still go out, so your watchers hear about every tick. That's on purpose.
 - No extra gem, no JavaScript library. One settings page, for the defaults of new lines.
 
-## Installation
+## Install
 
-Redmine 7.0 or newer, on any database Redmine supports. The plugin adds one small table for the line order. The folder
-must be named `redmine_rubylode_todo`, the same as the plugin id.
+Redmine 7.0 or newer, on any database Redmine supports. The plugin adds one small table for the line order.
 
-1. Put the plugin in your Redmine's `plugins` folder:
+1. Put the plugin folder in Redmine's `plugins/` directory, named `redmine_rubylode_todo`.
+2. Run `bundle exec rake redmine:plugins:migrate RAILS_ENV=production`.
+3. This plugin reads no environment variable. Restart Redmine.
+4. In Administration, Plugins, open the plugin and choose Configure.
 
-       cd /path/to/redmine/plugins
-       git clone https://github.com/rubylode/redmine-rubylode-todo.git redmine_rubylode_todo
+To get the folder, clone it or unpack a [release archive](https://github.com/rubylode/redmine-rubylode-todo/releases)
+into `plugins/` as `redmine_rubylode_todo`:
 
-   Or unpack a [release archive](https://github.com/rubylode/redmine-rubylode-todo/releases) there, as `redmine_rubylode_todo`.
-
-2. Create the table:
-
-       cd /path/to/redmine
-       bundle exec rake redmine:plugins:migrate RAILS_ENV=production
-
-3. Restart Redmine ([Passenger](https://www.phusionpassenger.com), [Puma](https://puma.io), whatever serves it).
-
-4. Allow it, as an administrator:
-   1. Administration, Roles and permissions: tick Use the to-do list for the roles that should see the page.
-   2. Administration, Settings, Projects: tick To-do under Default enabled modules for new projects.
-   3. Each existing project needs the module once (Settings, Modules). To do all of them at once:
-
-          bundle exec rails runner -e production 'Project.find_each { |project| project.enable_module!(:rubylode_todo) }'
-
-5. Open a project. A To-do tab now sits after Issues.
+    cd /path/to/redmine/plugins
+    git clone https://github.com/rubylode/redmine-rubylode-todo.git redmine_rubylode_todo
 
 With [Docker](https://www.docker.com), mount or copy the plugin to `/usr/src/redmine/plugins/redmine_rubylode_todo`,
 then migrate inside the container and restart it:
@@ -86,10 +58,8 @@ then migrate inside the container and restart it:
     docker compose exec redmine bundle exec rake redmine:plugins:migrate RAILS_ENV=production
     docker compose restart redmine
 
-If the migration complains about a missing secret key, pass the one the container already uses:
-`docker compose exec -e SECRET_KEY_BASE="$SECRET_KEY_BASE" redmine ...`.
-
-To upgrade, `git pull`, run the migration again (it does nothing when there is nothing new) and restart.
+To upgrade, `git pull`, run the migration again (it does nothing when there is nothing new) and restart. Version 2.0.0
+renames no saved setting, so settings saved under 1.x keep working.
 
 To remove it, run the line below, delete the folder and restart. This drops the order table. Tickets are not touched.
 
@@ -97,8 +67,8 @@ To remove it, run the line below, delete the folder and restart. This drops the 
 
 ## Settings
 
-New lines get Redmine's own defaults, and the person adding the line is the assignee. To change that, open
-Administration, Plugins, Rubylode To-do, Configure. One set of defaults applies to every project:
+New lines get Redmine's own defaults, and the person adding the line is the assignee. To change that, open the plugin's
+settings (Install, step 4). One set of defaults applies to every project:
 
 - Assignee: nobody, the person adding the line (the default), or a fixed user or group.
 - Tracker, status and priority.
@@ -112,13 +82,21 @@ assignee is used only where the project allows assigning to them, and a group on
 
 ![The settings page](docs/screenshots/settings.png)
 
-## Screenshots
+## Where it shows
+
+A To-do tab sits after Issues in each project that has the module. To turn it on:
+
+1. Administration, Roles and permissions: check Use the to-do list for the roles that should see the page.
+2. Administration, Settings, Projects: check To-do under Default enabled modules for new projects.
+3. Each existing project needs the module once (Settings, Modules). To do all of them at once:
+
+       bundle exec rails runner -e production 'Project.find_each { |project| project.enable_module!(:rubylode_todo) }'
 
 Click a line to edit it. Enter saves and opens a new line below, like a notes app, with the keys listed underneath.
 
 ![Editing a line, with the key hints below it](docs/screenshots/editing.png)
 
-Press + on a line to add a line under it. Tab nests a new line under the one above, Shift+Tab moves it back out.
+Press + on a line to add a line under it. Tab nests a new line under the one above, Shift+Tab outdents it.
 
 ![Adding a line under another](docs/screenshots/adding.png)
 
@@ -142,18 +120,25 @@ Press ? for the keys.
 
 ![The shortcuts list](docs/screenshots/shortcuts.png)
 
-## Details
+More details:
 
 - Pasting several lines creates one ticket per line, up to 100. Two spaces or a tab nest a line under the one above, and
   list markers (`- `, `* `, `1. `, `- [ ] `) are dropped.
 - New tickets get Redmine's default tracker, status and priority and are assigned to you, unless the settings say otherwise.
 - A closed line stays in place, crossed out, until you reload the page. Reopening a parent asks the same question as
   closing one.
-- Escape cancels an edit. Alt+Right nests the line you're editing under the one above, Alt+Left moves it back out.
+- Escape cancels an edit. Alt+Right nests the line you're editing under the line above, Alt+Left outdents it.
 - Collapse all and Expand all sit above the list. Folding is remembered per browser.
 - Drop a line on the middle of another to make it a child, on the top or bottom edge to reorder.
 
-## What's missing
+## Troubleshooting
+
+- If the migration complains about a missing secret key, pass the one the container already uses:
+  `docker compose exec -e SECRET_KEY_BASE="$SECRET_KEY_BASE" redmine ...`.
+- No To-do tab: the project needs the module, and your role needs the permission (Where it shows).
+- A setting seems ignored: a default that doesn't fit the project or the person is skipped on purpose (Settings).
+
+What's missing:
 
 - English only. The strings live in `config/locales/en.yml`; translations are welcome.
 - There is no undo.
@@ -162,9 +147,14 @@ Press ? for the keys.
 - Links inside the ticket dialog (another ticket, a wiki page) leave the list.
 - Drag and drop, the tooltip and the right-click menu have no automated test. Everything that changes a ticket does.
 
-## Try it
+## Tests
 
-A throwaway Redmine 7 runs from this folder, with the repository mounted as the plugin:
+    bin/test                                      all unit and integration tests
+    bin/test test/integration/todo_moving_test.rb one file
+
+They run in a Redmine 7 image with its test gems (`docker/test.Dockerfile`), send the requests a browser would send,
+and check the tickets and the stored order. For the browser parts, run a throwaway Redmine 7 from this folder, with the
+repository mounted as the plugin:
 
     docker compose up -d
     docker compose exec redmine bundle exec rake redmine:plugins:migrate
@@ -172,15 +162,7 @@ A throwaway Redmine 7 runs from this folder, with the repository mounted as the 
     open http://localhost:3007
 
 Sign in as admin (password admin, change it on first login), load the default data under Administration, create a
-project, enable the To-do module and grant the permission. Wipe it with `docker compose down -v`.
-
-## Tests
-
-    bin/test                                      all integration tests
-    bin/test test/integration/todo_moving_test.rb one file
-
-They run in a Redmine 7 image with its test gems (`docker/test.Dockerfile`), send the requests a browser would send,
-and check the tickets and the stored order. For the browser parts, try these in the throwaway Redmine:
+project, enable the To-do module and grant the permission. Wipe it with `docker compose down -v`. Then try these:
 
 1. Add a line, edit it, tick it, untick it (show closed tickets to find it).
 2. Tick a parent that has open children. The confirmation names the count, and Cancel changes nothing.
@@ -188,13 +170,10 @@ and check the tickets and the stored order. For the browser parts, try these in 
 4. Hover a line for the tooltip, right click for the menu.
 5. Open a ticket in the dialog, change the subject, save.
 
-Pull Requests are welcome!
-
-## Releasing
-
-Push a `vX.Y.Z` tag whose version matches `version` in `init.rb` and has an entry in `CHANGELOG.md`. CI runs the tests, builds `redmine_rubylode_todo-X.Y.Z.zip` and publishes the GitHub release with the changelog entry as its notes. To build a release for a tag that already exists, use Actions, release, Run workflow.
-
-The text to paste when listing the plugin on www.redmine.org, and how to read the result of Check for updates, is in [docs/redmine-org-listing.md](docs/redmine-org-listing.md).
+Pull Requests are welcome! To release, push a `vX.Y.Z` tag whose version matches `version` in `init.rb` and has an entry
+in `CHANGELOG.md`. CI runs the tests, builds `redmine_rubylode_todo-X.Y.Z.zip` and publishes the GitHub release with the
+changelog entry as its notes. To build a release for a tag that already exists, use Actions, release, Run workflow. The
+text to paste when listing the plugin on www.redmine.org is in [docs/redmine-org-listing.md](docs/redmine-org-listing.md).
 
 ## License
 
