@@ -8,17 +8,17 @@
           unticks every checkbox inside an element marked hascontextmenu, so only the body carries that mark. %>
       <%= tag.div class: "todo-line-text tooltip",
                   data: { action: "dragover->todo#dragOver dragleave->todo#dragLeave drop->todo#drop mousemove->todo#placeTip" } do %>
-        <span class="todo-grip" draggable="true" title="<%= l(:label_todo_drag) %>" aria-hidden="true"
+        <span class="todo-grip" draggable="true" title="<%= l("rubylode_todo.line.drag") %>" aria-hidden="true"
               data-action="dragstart->todo#dragStart dragend->todo#dragEnd">&#8942;&#8942;</span>
         <% if counts %>
-          <button type="button" class="todo-fold" aria-expanded="true" title="<%= l(:label_todo_fold_line) %>"
-                  aria-label="<%= l(:label_todo_fold_label, id: ticket.id, count: counts.open + counts.closed) %>"
+          <button type="button" class="todo-fold" aria-expanded="true" title="<%= l("rubylode_todo.line.fold") %>"
+                  aria-label="<%= l("rubylode_todo.line.fold_label", id: ticket.id, count: counts.open + counts.closed) %>"
                   data-action="click->todo#keepClick click->todo#toggleFold"></button>
         <% else %>
           <span class="todo-fold-spacer"></span>
         <% end %>
         <%= check_box_tag nil, "1", ticket.closed?, id: nil, class: "todo-checkbox",
-                          "aria-label": l(ticket.closed? ? :label_todo_reopen_ticket : :label_todo_close_ticket, id: ticket.id),
+                          "aria-label": l(ticket.closed? ? "rubylode_todo.line.reopen_ticket" : "rubylode_todo.line.close_ticket", id: ticket.id),
                           data: { action: "click->todo#keepClick change->todo#toggle" } %>
         <div class="todo-line-body hascontextmenu">
           <%= check_box_tag "ids[]", ticket.id, false, id: nil, class: "todo-context-menu-selection" %>
@@ -26,15 +26,15 @@
                        data: { subject: ticket.subject, action: "click->todo#keepClick click->todo#edit" } %>
           <span class="todo-line-meta">
             <% if counts %>
-              <span class="todo-counts" title="<%= l(:text_todo_counts, open: counts.open, closed: counts.closed) %>">
-                <%= l(:text_todo_progress, closed: counts.closed, total: counts.open + counts.closed) %>
+              <span class="todo-counts" title="<%= l("rubylode_todo.line.counts", open: counts.open, closed: counts.closed) %>">
+                <%= l("rubylode_todo.line.progress", closed: counts.closed, total: counts.open + counts.closed) %>
                 <progress class="todo-progress" max="<%= counts.open + counts.closed %>" value="<%= counts.closed %>" aria-hidden="true"></progress>
               </span>
             <% end %>
             <%= link_to "##{ticket.id}", issue_path(ticket), class: "todo-ticket-link",
                         data: { action: "click->todo#keepClick click->todo#openTicket" } %>
-            <button type="button" class="todo-add-child" title="<%= l(:label_todo_add_child) %>"
-                    aria-label="<%= l(:label_todo_add_child) %>"
+            <button type="button" class="todo-add-child" title="<%= l("rubylode_todo.line.add_child") %>"
+                    aria-label="<%= l("rubylode_todo.line.add_child") %>"
                     data-action="click->todo#keepClick click->todo#addChild">+</button>
           </span>
         </div>

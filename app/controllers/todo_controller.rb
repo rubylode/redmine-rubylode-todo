@@ -32,7 +32,7 @@ class TodoController < ApplicationController
 
   def create
     subject = params[:subject].to_s.strip
-    return render_failure(l(:text_todo_blank_subject)) if subject.empty?
+    return render_failure(l("rubylode_todo.error.blank_subject")) if subject.empty?
     return deny_access unless User.current.allowed_to?(:add_issues, @project)
 
     ticket = Issue.new(project: @project, author: User.current, subject: subject)
@@ -42,14 +42,14 @@ class TodoController < ApplicationController
     ticket.tracker = tracker
     ticket.status = ticket.tracker.default_status
     ticket.priority = IssuePriority.default || IssuePriority.active.first
-    TodoNewLineDefaults.new(Setting.plugin_redmine_rubylode_todo).apply(ticket, User.current)
+    TodoNewLineDefaults.new.apply(ticket, User.current)
 
     parent = project_ticket_or_nil(params[:parent_id])
     before = project_ticket_or_nil(params[:before_id])
     return render_404 if (params[:parent_id].present? && parent.nil?) || (params[:before_id].present? && before.nil?)
 
     if parent
-      return render_failure(l(:text_todo_no_subtask_right)) unless User.current.allowed_to?(:manage_subtasks, @project)
+      return render_failure(l("rubylode_todo.error.no_subtask_right")) unless User.current.allowed_to?(:manage_subtasks, @project)
 
       ticket.parent_issue_id = parent.id
     end
@@ -166,7 +166,7 @@ class TodoController < ApplicationController
 
     ticket.init_journal(User.current)
     ticket.safe_attributes = { "parent_issue_id" => parent&.id.to_s }
-    return l(:text_todo_no_subtask_right) unless ticket.parent_issue_id == parent&.id
+    return l("rubylode_todo.error.no_subtask_right") unless ticket.parent_issue_id == parent&.id
     return nil if ticket.save
 
     ticket.errors.full_messages.to_sentence
@@ -178,11 +178,11 @@ class TodoController < ApplicationController
     return l(:notice_not_authorized) unless ticket.visible?(User.current) && ticket.attributes_editable?(User.current)
 
     status = yield ticket
-    return l(:text_todo_no_status_allowed, ticket: "##{ticket.id}") unless status
+    return l("rubylode_todo.error.no_status_allowed", ticket: "##{ticket.id}") unless status
 
     ticket.init_journal(User.current)
     ticket.safe_attributes = { "status_id" => status.id.to_s }
-    return l(:text_todo_no_status_allowed, ticket: "##{ticket.id}") unless ticket.status_id == status.id
+    return l("rubylode_todo.error.no_status_allowed", ticket: "##{ticket.id}") unless ticket.status_id == status.id
     return nil if ticket.save
 
     ticket.errors.full_messages.to_sentence

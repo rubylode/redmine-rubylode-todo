@@ -169,7 +169,7 @@ class TodoPageTest < Redmine::IntegrationTest
   test "the full text switch says what it does" do
     log_user("jsmith", "jsmith")
     get "/projects/ecookbook/todo"
-    assert_select "a[data-action*='todo#toggleFullText'][data-todo-full-label='Show full text'][data-todo-cut-label='Cut text at 2 lines']", text: "Show full text"
+    assert_select "a[data-action*='todo#toggleFullText'][data-todo-full-label='Show full text'][data-todo-cut-label='Cut text at two lines']", text: "Show full text"
   end
 
   test "a member without the permission is refused" do
@@ -194,5 +194,24 @@ class TodoPageTest < Redmine::IntegrationTest
     assert_equal "https://github.com/rubylode/#{repository_name}", plugin.url
     assert_equal "Rubylode", plugin.author
     assert_equal "https://github.com/rubylode", plugin.author_url
+  end
+
+  test "the page hands the script both forms of each confirmation, so the count picks the singular or the plural" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    container = css_select("div.todo").first
+    close = JSON.parse(container["data-todo-confirm-close-subtree-value"])
+    reopen = JSON.parse(container["data-todo-confirm-reopen-subtree-value"])
+    assert_equal "Closing this also closes %{count} open ticket below it.", close["one"]
+    assert_equal "Closing this also closes %{count} open tickets below it.", close["other"]
+    assert_equal "Reopening this also reopens %{count} closed ticket below it.", reopen["one"]
+    assert_equal "Reopening this also reopens %{count} closed tickets below it.", reopen["other"]
+  end
+
+  test "the shortcuts list carries every key from the locale" do
+    log_user("jsmith", "jsmith")
+    get "/projects/ecookbook/todo"
+    assert_select "dialog.todo-shortcuts dt kbd", count: 9
+    assert_select "dialog.todo-shortcuts dt kbd", text: "Alt+Right / Alt+Left"
   end
 end

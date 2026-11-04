@@ -5,7 +5,7 @@ import { application } from "controllers/application"
 // so what is on the page is always what the server stored.
 class TodoController extends Controller {
   static targets = ["list", "message", "newLine", "shortcuts", "live", "ticketDialog", "ticketBody"]
-  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: String, confirmReopenSubtree: String, composerPlaceholder: String, tooManyLines: String, failure: String,
+  static values = { linesPath: String, pageUrl: String, confirmCloseSubtree: Object, confirmReopenSubtree: Object, composerPlaceholder: String, tooManyLines: String, failure: String,
     editKeys: String, composerKeys: String, nestUnder: String, announcements: Object, loading: String }
 
   connect() {
@@ -554,7 +554,8 @@ class TodoController extends Controller {
     if (!checkbox.checked) {
       let reopened = await this.send("DELETE", path, {}, { quiet: [409] })
       if (reopened === false && this.lastStatus === 409) {
-        const message = this.confirmReopenSubtreeValue.replace("%{count}", this.lastBody.closed_descendant_count)
+        const reopenCount = this.lastBody.closed_descendant_count
+        const message = (reopenCount === 1 ? this.confirmReopenSubtreeValue.one : this.confirmReopenSubtreeValue.other).replace("%{count}", reopenCount)
         if (!window.confirm(message)) return this.finishToggle(checkbox, false)
         reopened = await this.send("DELETE", path, { reopen_subtree: "1" })
       }
@@ -566,7 +567,8 @@ class TodoController extends Controller {
 
     let result = await this.send("POST", path, {}, { quiet: [409] })
     if (result === false && this.lastStatus === 409) {
-      const message = this.confirmCloseSubtreeValue.replace("%{count}", this.lastBody.open_descendant_count)
+      const closeCount = this.lastBody.open_descendant_count
+      const message = (closeCount === 1 ? this.confirmCloseSubtreeValue.one : this.confirmCloseSubtreeValue.other).replace("%{count}", closeCount)
       if (!window.confirm(message)) return this.finishToggle(checkbox, false)
       result = await this.send("POST", path, { close_subtree: "1" })
     }

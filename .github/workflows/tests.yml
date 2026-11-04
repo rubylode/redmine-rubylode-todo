@@ -51,7 +51,7 @@ jobs:
 
       - name: Run the plugin's tests
         working-directory: redmine
-        run: bundle exec rake redmine:plugins:test:integration NAME=redmine_rubylode_todo
+        run: bundle exec rake redmine:plugins:test:units redmine:plugins:test:integration NAME=redmine_rubylode_todo
 
   # A snapshot of what a release would contain, built from the commit that just passed on main.
   package:

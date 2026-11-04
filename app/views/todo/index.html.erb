@@ -14,31 +14,31 @@
             data: { controller: "todo",
                     todo_lines_path_value: project_todo_lines_path(@project),
                     todo_page_url_value: project_todo_path(@project, todo_query_params(@query)),
-                    todo_confirm_close_subtree_value: l(:text_todo_confirm_close_subtree, count: "%{count}"),
-                    todo_confirm_reopen_subtree_value: l(:text_todo_confirm_reopen_subtree, count: "%{count}"),
-                    todo_composer_placeholder_value: l(:text_todo_composer_hint),
-                    todo_too_many_lines_value: l(:text_todo_too_many_lines, count: "%{count}"),
-                    todo_edit_keys_value: l(:text_todo_edit_keys),
-                    todo_composer_keys_value: l(:text_todo_composer_keys, nest: "%{nest}"),
-                    todo_nest_under_value: l(:label_todo_nest_under, id: "%{id}"),
-                    todo_announcements_value: { closed: l(:text_todo_announce_closed, id: "%{id}"),
-                                                reopened: l(:text_todo_announce_reopened, id: "%{id}"),
-                                                moved: l(:text_todo_announce_moved, id: "%{id}"),
-                                                created: l(:text_todo_announce_created, id: "%{id}"),
-                                                saved: l(:text_todo_announce_saved, id: "%{id}") },
-                    todo_loading_value: l(:text_todo_loading),
-                    todo_failure_value: l(:text_todo_request_failed) } do %>
+                    todo_confirm_close_subtree_value: l("rubylode_todo.confirm.close_subtree"),
+                    todo_confirm_reopen_subtree_value: l("rubylode_todo.confirm.reopen_subtree"),
+                    todo_composer_placeholder_value: l("rubylode_todo.page.new_line"),
+                    todo_too_many_lines_value: l("rubylode_todo.error.too_many_lines", count: "%{count}"),
+                    todo_edit_keys_value: l("rubylode_todo.keys.edit"),
+                    todo_composer_keys_value: l("rubylode_todo.keys.composer", nest: "%{nest}"),
+                    todo_nest_under_value: l("rubylode_todo.line.nest_under", id: "%{id}"),
+                    todo_announcements_value: { closed: l("rubylode_todo.announce.closed", id: "%{id}"),
+                                                reopened: l("rubylode_todo.announce.reopened", id: "%{id}"),
+                                                moved: l("rubylode_todo.announce.moved", id: "%{id}"),
+                                                created: l("rubylode_todo.announce.created", id: "%{id}"),
+                                                saved: l("rubylode_todo.announce.saved", id: "%{id}") },
+                    todo_loading_value: l("rubylode_todo.page.loading"),
+                    todo_failure_value: l("rubylode_todo.error.request_failed") } do %>
   <div class="contextual">
-    <a href="#" data-action="click->todo#showShortcuts"><%= l(:label_todo_shortcuts) %> ?</a> |
-    <a href="#" role="button" aria-pressed="false" title="<%= l(:text_todo_full_text_hint) %>"
-       data-todo-full-label="<%= l(:label_todo_full_text) %>" data-todo-cut-label="<%= l(:label_todo_cut_text) %>"
-       data-action="click->todo#toggleFullText"><%= l(:label_todo_full_text) %></a> |
-    <a href="#" data-action="click->todo#collapseAll"><%= l(:label_todo_collapse_all) %></a> |
-    <a href="#" data-action="click->todo#expandAll"><%= l(:label_todo_expand_all) %></a> |
+    <a href="#" data-action="click->todo#showShortcuts"><%= l("rubylode_todo.page.shortcuts") %> ?</a> |
+    <a href="#" role="button" aria-pressed="false" title="<%= l("rubylode_todo.page.full_text_hint") %>"
+       data-todo-full-label="<%= l("rubylode_todo.page.full_text") %>" data-todo-cut-label="<%= l("rubylode_todo.page.cut_text") %>"
+       data-action="click->todo#toggleFullText"><%= l("rubylode_todo.page.full_text") %></a> |
+    <a href="#" data-action="click->todo#collapseAll"><%= l("rubylode_todo.page.collapse_all") %></a> |
+    <a href="#" data-action="click->todo#expandAll"><%= l("rubylode_todo.page.expand_all") %></a> |
     <% if @show_closed %>
-      <%= link_to l(:label_todo_hide_closed), project_todo_path(@project, todo_status_params(@query, false)) %>
+      <%= link_to l("rubylode_todo.page.hide_closed"), project_todo_path(@project, todo_status_params(@query, false)) %>
     <% else %>
-      <%= link_to l(:label_todo_show_closed), project_todo_path(@project, todo_status_params(@query, true)) %>
+      <%= link_to l("rubylode_todo.page.show_closed"), project_todo_path(@project, todo_status_params(@query, true)) %>
     <% end %>
   </div>
 
@@ -54,25 +54,22 @@
   <% end %>
 
   <input type="text" class="todo-new-line" autocomplete="off"
-         placeholder="<%= l(:label_todo_new_line) %>"
+         placeholder="<%= l("rubylode_todo.page.new_line") %>"
          data-todo-target="newLine" data-action="keydown->todo#addLine paste->todo#pasteIntoNewLine">
 
   <dialog class="todo-shortcuts" data-todo-target="shortcuts" aria-labelledby="todo-shortcuts-title">
-    <h3 id="todo-shortcuts-title"><%= l(:label_todo_shortcuts) %></h3>
+    <h3 id="todo-shortcuts-title"><%= l("rubylode_todo.page.shortcuts") %></h3>
     <dl>
-      <% [["Enter", :text_todo_key_enter], ["Tab / Shift+Tab", :text_todo_key_tab], ["Esc", :text_todo_key_escape],
-          ["Up / Down", :text_todo_key_up_down], ["Alt+Up / Alt+Down", :text_todo_key_alt_up_down],
-          ["Alt+Right / Alt+Left", :text_todo_key_alt_left_right], ["Cmd+Enter / Ctrl+Enter", :text_todo_key_cmd_enter],
-          ["Paste", :text_todo_key_paste], ["?", :text_todo_key_question]].each do |keys, description| %>
-        <dt><kbd><%= keys %></kbd></dt>
-        <dd><%= l(description) %></dd>
+      <% %i[enter tab escape up_down alt_up_down alt_left_right cmd_enter paste question].each do |shortcut| %>
+        <dt><kbd><%= l("rubylode_todo.shortcut.#{shortcut}.keys") %></kbd></dt>
+        <dd><%= l("rubylode_todo.shortcut.#{shortcut}.description") %></dd>
       <% end %>
     </dl>
     <form method="dialog"><button class="todo-shortcuts-close"><%= l(:button_close) %></button></form>
   </dialog>
 
   <%# The ticket's own page, shown here: its card, and its edit form behind the Edit button. %>
-  <dialog class="todo-ticket-dialog" data-todo-target="ticketDialog" aria-label="<%= l(:label_todo_ticket) %>"
+  <dialog class="todo-ticket-dialog" data-todo-target="ticketDialog" aria-label="<%= l("rubylode_todo.page.ticket") %>"
           data-action="click->todo#closeTicketOnBackdrop close->todo#clearTicket submit->todo#submitTicket">
     <button type="button" class="todo-ticket-close" aria-label="<%= l(:button_close) %>" data-action="click->todo#closeTicket">&times;</button>
     <div class="todo-ticket-body" data-todo-target="ticketBody"></div>

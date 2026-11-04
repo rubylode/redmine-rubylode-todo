@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # Run the plugin's tests inside the Redmine 7 test image. Pass a test file to run just that one.
-#   bin/test                                   all integration tests
+#   bin/test                                   all unit and integration tests
 #   bin/test test/integration/todo_page_test.rb
 Dir.chdir(File.expand_path("..", __dir__))
 
@@ -8,7 +8,7 @@ target = ARGV.first
 runner = if target
   "bundle exec ruby -Itest plugins/redmine_rubylode_todo/#{target}"
 else
-  "bundle exec rake redmine:plugins:test:integration NAME=redmine_rubylode_todo"
+  "bundle exec rake redmine:plugins:test:units redmine:plugins:test:integration NAME=redmine_rubylode_todo"
 end
 
 inside = <<~SH

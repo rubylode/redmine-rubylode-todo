@@ -1,60 +1,121 @@
 en:
+  # Redmine reads these three by their flat names: the menu caption, the module name and the permission name.
   label_todo: To-do
   project_module_rubylode_todo: To-do
   permission_use_rubylode_todo: Use the to-do list
-  label_todo_show_closed: Show closed tickets
-  label_todo_hide_closed: Hide closed tickets
-  text_todo_empty: Nothing to do.
-  text_todo_blank_subject: The line is empty.
-  text_todo_no_status_allowed: "Your role cannot move %{ticket} to that status."
-  text_todo_no_subtask_right: "Your role cannot make a ticket a subtask."
-  label_todo_collapse_all: Collapse all
-  label_todo_expand_all: Expand all
-  label_todo_fold_line: Fold or unfold the lines below
-  label_todo_new_line: Add a to-do, or paste several lines to add one per line
-  text_todo_confirm_close_subtree: "Closing this also closes %{count} open ticket(s) below it. Continue?"
-  text_todo_confirm_reopen_subtree: "Reopening this also reopens %{count} closed ticket(s) below it. Continue?"
-  text_todo_counts: "%{open} open, %{closed} closed"
-  text_todo_progress: "%{closed} of %{total}"
-  label_todo_add_child: Add a line below this one
-  text_todo_composer_hint: Add a to-do, or paste several lines to add one per line
-  text_todo_too_many_lines: "Paste at most %{count} lines at a time."
-  text_todo_request_failed: The change could not be saved. Reload the page and try again.
-  label_todo_drag: Drag to move
-  label_todo_fold_label: "Lines below #%{id} (%{count})"
-  label_todo_close_ticket: "Close #%{id}"
-  label_todo_reopen_ticket: "Reopen #%{id}"
-  label_todo_nest_under: "Tab nest under #%{id}"
-  label_todo_shortcuts: Shortcuts
-  label_todo_full_text: Show full text
-  label_todo_cut_text: Cut text at 2 lines
-  text_todo_full_text_hint: Long subjects are cut at two lines. This shows them whole, and back again.
-  text_todo_edit_keys: "Enter save, next line · ⌘Enter close · ↑↓ between lines · ⌥↑↓ move · ⌥→ nest, ⌥← outdent · Esc cancel"
-  text_todo_composer_keys: "Enter next line · %{nest}⇧Tab outdent · Esc stop · paste several lines to add one per line"
-  text_todo_announce_closed: "Closed #%{id}"
-  text_todo_announce_reopened: "Reopened #%{id}"
-  text_todo_announce_moved: "Moved #%{id}"
-  text_todo_announce_created: "Added #%{id}"
-  text_todo_key_enter: Save the line and start the next one below it.
-  text_todo_key_tab: In a new line, nest it under the line above, or move it back out.
-  text_todo_key_escape: Cancel an edit, or stop adding lines.
-  text_todo_key_up_down: While editing, go to the line above or below.
-  text_todo_key_alt_up_down: While editing, move the line up or down among its siblings.
-  text_todo_key_alt_left_right: While editing, nest the line under the one above, or move it back out.
-  text_todo_key_cmd_enter: While editing, close or reopen the line.
-  text_todo_key_paste: Paste several lines to add one per line. Indent two spaces to nest.
-  text_todo_key_question: Open this list when no field has the focus.
-  label_todo_ticket: Ticket
-  text_todo_loading: Loading the ticket...
-  text_todo_announce_saved: "Saved #%{id}"
-  text_todo_settings_intro: "Defaults for a line added on the To-do page. A default that does not fit a project or a person is skipped, and the ticket is still created."
-  label_todo_settings_nobody: Nobody
-  label_todo_settings_author: The person adding the line
-  label_todo_settings_default_tracker: "Redmine's default (the first tracker the person may use)"
-  label_todo_settings_default_status: "The tracker's default status"
-  label_todo_settings_default_priority: "Redmine's default priority"
-  label_todo_settings_no_date: Leave empty
-  text_todo_settings_assignee_hint: "A fixed user or group is used where the project allows assigning to them."
-  text_todo_settings_version_hint: "The name of an open version. Used in each project that has a version with exactly this name."
-  text_todo_settings_category_hint: "The name of a category. Used in each project that has one with exactly this name."
-  text_todo_settings_due_hint: "Days after today. Leave empty for no due date."
+
+  rubylode_todo:
+    settings:
+      intro: "Defaults for a line added on the To-do page. A default that doesn't fit a project or a person is skipped, and the ticket is still created."
+      options:
+        nobody: Nobody
+        author: The person adding the line
+        default_tracker: "Redmine's default (the first tracker the person may use)"
+        default_status: "The tracker's default status"
+        default_priority: "Redmine's default priority"
+        no_date: Leave empty
+        today: Today
+      assignee:
+        label: Assignee
+        hint: "Who a new line is assigned to. A fixed user or group is used only in projects that allow assigning to them."
+      tracker_id:
+        label: Tracker
+        hint: "The tracker of a new line. Empty means Redmine's default."
+      status_id:
+        label: Status
+        hint: "The status of a new line. Empty means the tracker's default status."
+      priority_id:
+        label: Priority
+        hint: "The priority of a new line. Empty means Redmine's default priority."
+      version_name:
+        label: Target version
+        hint: "The name of an open version for a new line. It is used in each project that has a version with exactly this name."
+      category_name:
+        label: Category
+        hint: "The name of a category for a new line. It is used in each project that has a category with exactly this name."
+      start_date:
+        label: Start date
+        hint: "The start date of a new line. Empty means no start date."
+      due_in_days:
+        label: Due date
+        hint: "The number of days after today that a new line is due. Empty means no due date."
+
+    page:
+      empty: Nothing to do.
+      shortcuts: Shortcuts
+      full_text: Show full text
+      cut_text: Cut text at two lines
+      full_text_hint: "Long subjects are cut at two lines. Click to show them whole, click again to cut them."
+      collapse_all: Collapse all
+      expand_all: Expand all
+      show_closed: Show closed tickets
+      hide_closed: Hide closed tickets
+      new_line: "Add a to-do, or paste several lines (one ticket per line)"
+      ticket: Ticket
+      loading: Loading the ticket
+
+    line:
+      add_child: Add a line below this one
+      drag: Drag to move
+      fold: Fold or unfold the lines below
+      fold_label: "Lines below #%{id} (%{count})"
+      close_ticket: "Close #%{id}"
+      reopen_ticket: "Reopen #%{id}"
+      nest_under: "Tab nests it under #%{id}"
+      counts: "%{open} open, %{closed} closed"
+      progress: "%{closed} of %{total}"
+
+    confirm:
+      close_subtree:
+        one: "Closing this also closes %{count} open ticket below it."
+        other: "Closing this also closes %{count} open tickets below it."
+      reopen_subtree:
+        one: "Reopening this also reopens %{count} closed ticket below it."
+        other: "Reopening this also reopens %{count} closed tickets below it."
+
+    error:
+      blank_subject: The line is empty.
+      no_status_allowed: "Your role cannot move %{ticket} to that status."
+      no_subtask_right: "Your role cannot make a ticket a subtask."
+      too_many_lines: "Paste at most %{count} lines at a time."
+      request_failed: The change could not be saved. Reload the page and try again.
+
+    keys:
+      edit: "Enter save, next line · ⌘Enter close · ↑↓ between lines · ⌥↑↓ move · ⌥→ nest, ⌥← outdent · Esc cancel"
+      composer: "Enter next line · %{nest}⇧Tab outdent · Esc stop · paste several lines (one ticket per line)"
+
+    announce:
+      closed: "Closed #%{id}"
+      reopened: "Reopened #%{id}"
+      moved: "Moved #%{id}"
+      created: "Added #%{id}"
+      saved: "Saved #%{id}"
+
+    shortcut:
+      enter:
+        keys: Enter
+        description: Save the line and start the next one below it.
+      tab:
+        keys: Tab / Shift+Tab
+        description: In a new line, nest it under the line above, or outdent it.
+      escape:
+        keys: Esc
+        description: Cancel an edit, or stop adding lines.
+      up_down:
+        keys: Up / Down
+        description: While editing, go to the line above or below.
+      alt_up_down:
+        keys: Alt+Up / Alt+Down
+        description: While editing, move the line up or down among its siblings.
+      alt_left_right:
+        keys: Alt+Right / Alt+Left
+        description: While editing, nest the line under the line above, or outdent it.
+      cmd_enter:
+        keys: Cmd+Enter / Ctrl+Enter
+        description: While editing, close or reopen the line.
+      paste:
+        keys: Paste
+        description: Paste several lines to add one per line. Indent two spaces to nest.
+      question:
+        keys: "?"
+        description: Open this list when no field has the focus.
