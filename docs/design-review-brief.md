@@ -6,7 +6,7 @@ A prompt for a design reviewer. Attach screenshots of the To-do page (see the la
 
 Review the design of Rubylode To-do, a Redmine 7 plugin. It adds a To-do page to a project. Every line is a real
 Redmine ticket, shown as a plain checklist with nested lines, in the style of a notes app. I want concrete suggestions
-to make it clearer, calmer and faster to use. Please don't suggest a rewrite on another stack.
+to make it clearer, calmer and faster to use. No rewrite on another stack.
 
 What the page does today:
 
@@ -39,7 +39,7 @@ Known problems I'd like your view on:
 - The drop targets for drag and drop (before, after, as a child) are easy to get wrong. How should they look?
 - Closed lines, folded lines, lines being edited and the inline new line each need a clear state.
 
-Please answer with:
+Answer with:
 
 1. The five changes that would improve the page most, in order, each with the reason.
 2. For each, CSS or markup I can apply (spacing, sizes, colours as Redmine variables, states).

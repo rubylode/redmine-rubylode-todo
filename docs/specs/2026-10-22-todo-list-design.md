@@ -1,6 +1,9 @@
 # To-do list for Redmine
 
-Redmine 7 and up only. Status: draft, waiting for review.
+Redmine 7 and up only. Status: original design for 1.0.0; the plugin has moved on, see the README.
+
+Superseded since 1.0.0: version 1.1.0 added a settings page for the defaults of new lines, the shortcuts went beyond Enter and Escape, and
+the right-click menu is Redmine's own (status, tracker, assignee, watchers, edit, copy), not the list in this document.
 
 TL;DR: a To-do page per project that shows its tickets as a plain nested list, and keeps every change inside Redmine's own ticket save.
 
@@ -21,7 +24,7 @@ opens the normal ticket edit.
 - Drag a line onto another one to make it a child, like bullets in Apple Notes. Drag between lines to reorder.
 - Click the text to edit the subject in place.
 - Hover a line for Redmine's own ticket tooltip.
-- Right click a line for a small menu: set priority, assign to, set due date, open full edit, delete.
+- Right click a line for Redmine's own context menu (as built: status, tracker, assignee, watchers, edit, copy).
 - Full edit opens in a modal, with all fields and file uploads.
 
 ## Acceptance behaviours
@@ -51,8 +54,9 @@ opens the normal ticket edit.
 15. Delete is chosen: the person confirms once, and the ticket is deleted only if Redmine would allow it.
 16. A change is made from the list: it goes through the normal ticket save, so validation, workflow, permissions,
     journals and notification mails behave exactly as for any edit.
-17. The plugin is installed on a stock Redmine 7: it needs no other gem, no JavaScript library, no settings page and no
-    configuration besides enabling the module for a project and granting the permission.
+17. The plugin is installed on a stock Redmine 7: it needs no other gem, no JavaScript library, no
+    configuration besides enabling the module for a project and granting the permission. (Since 1.1.0 an optional settings page sets
+    the defaults of new lines.)
 
 ## Decisions
 
@@ -93,9 +97,9 @@ throwaway Redmine from the compose file, with a short checklist the person can r
 
 - A personal, cross-project "my to-do" page.
 - Per-person ordering.
-- Plugin settings, and choosing the closing status.
+- Choosing the closing status. (Plugin settings for the defaults of new lines came in 1.1.0.)
 - Checklists inside a ticket, recurring items, reminders.
-- Keyboard shortcuts beyond Enter and Escape.
+- Keyboard shortcuts beyond Enter and Escape. (Many came later; see the README.)
 - Redmine 6 and older.
 - A browser test suite.
 
