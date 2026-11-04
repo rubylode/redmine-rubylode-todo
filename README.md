@@ -49,7 +49,7 @@ and anything bigger is one click away from the normal ticket edit.
 
 ## Installation
 
-Redmine 6.0 or newer, on any database Redmine supports. The plugin adds one small table for the line order. The folder
+Redmine 7.0 or newer, on any database Redmine supports. The plugin adds one small table for the line order. The folder
 must be named `redmine_rubylode_todo`, the same as the plugin id.
 
 1. Put the plugin in your Redmine's `plugins` folder:
@@ -198,4 +198,4 @@ GPL v2 or later, the same as Redmine. See `LICENSE`.
 Copyright (C) 2026  Nick Gorbikoff. Each Ruby file carries the same short notice Redmine puts on its own.
 
 No warranty, as the GPL says. The plugin creates, edits, closes and reorders tickets and adds one table, so try it on a
-copy of your tracker first. I tested it in CI with the Rubylode plugins' own test suites on Redmine 7.0, 6.1 and 6.0, and nothing else.
+copy of your tracker first. I tested it on Redmine 7.0.2 and 7.0-stable, and nothing else.

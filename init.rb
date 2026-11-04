@@ -23,8 +23,8 @@ Redmine::Plugin.register :redmine_rubylode_todo do
   author_url "https://github.com/rubylode"
   url "https://github.com/rubylode/redmine-rubylode-todo"
   description "A to-do list over a project's tickets: nested lines, checkboxes, drag and drop, keyboard editing"
-  version "1.2.0"
-  requires_redmine version_or_higher: "6.0.0"
+  version "1.2.1"
+  requires_redmine version_or_higher: "7.0.0"
 
   project_module :rubylode_todo do
     permission :use_rubylode_todo, { todo: %i[index create update close reopen move] }

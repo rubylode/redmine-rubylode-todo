@@ -4,6 +4,14 @@ All notable changes to this plugin. The format follows [Keep a Changelog](https:
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-04
+
+### Changed
+
+- Needs Redmine 7.0 or newer again. Version 1.2.0 said Redmine 6.0 and newer, which was wrong: the to-do page runs on the
+  Stimulus setup that Redmine 7 ships, and older versions do not have it. The page would show there without working
+  controls. The plugin's own tests do not run the script, so they passed on 6.0 and 6.1 all the same. No code changed in this version.
+
 ## [1.2.0] - 2026-11-04
 
 ### Changed
