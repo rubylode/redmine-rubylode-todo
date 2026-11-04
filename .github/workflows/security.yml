@@ -1,0 +1,81 @@
+name: security
+
+# Free for public repositories: CodeQL code scanning, dependency review on pull requests, a secret scan and Brakeman.
+# Results land in the repository's Security tab. Brakeman reports without failing the build.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - ruby
+          - javascript-typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # Fails a pull request that adds a dependency with a known high or critical vulnerability.
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  # Leaked secrets in the pushed commits; reports verified findings and ones it cannot check.
+  secrets:
+    name: Secret scan
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --results=verified,unknown
+
+  # Rails-aware static scan. Plugins have no Rails app around them, hence --force-scan.
+  brakeman:
+    name: Brakeman
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+      - run: gem install brakeman
+      - run: brakeman --force-scan --no-pager --no-exit-on-warn --no-exit-on-error -f sarif -o brakeman.sarif .
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: brakeman.sarif
+          category: brakeman

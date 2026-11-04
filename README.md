@@ -2,7 +2,12 @@
 
 <p><img src="docs/thumbnail.png" alt="Rubylode To-do plugin" width="160"></p>
 
-[![tests](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml/badge.svg)](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml)
+[![tests](https://img.shields.io/github/actions/workflow/status/rubylode/redmine-rubylode-todo/tests.yml?branch=main&label=tests)](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/tests.yml)
+[![security](https://img.shields.io/github/actions/workflow/status/rubylode/redmine-rubylode-todo/security.yml?branch=main&label=security)](https://github.com/rubylode/redmine-rubylode-todo/actions/workflows/security.yml)
+[![version](https://img.shields.io/github/v/tag/rubylode/redmine-rubylode-todo?sort=semver&label=version)](https://github.com/rubylode/redmine-rubylode-todo/tags)
+[![license](https://img.shields.io/github/license/rubylode/redmine-rubylode-todo)](https://github.com/rubylode/redmine-rubylode-todo/blob/main/LICENSE)
+![Redmine](https://img.shields.io/badge/Redmine-7.0-b22222)
+![Ruby](https://img.shields.io/badge/Ruby-3.4%20%7C%204.0-cc342d)
 
 A To-do page for every [Redmine](https://www.redmine.org) project, where each line is a real ticket.
 
