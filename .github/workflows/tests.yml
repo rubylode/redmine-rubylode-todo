@@ -18,8 +18,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        redmine: ["7.0.2", "7.0-stable"]
-        ruby: ["3.4", "4.0"]
+        include:
+          - { redmine: "7.0.2", ruby: "3.4" }
+          - { redmine: "7.0.2", ruby: "4.0" }
+          - { redmine: "7.0-stable", ruby: "3.4" }
+          - { redmine: "7.0-stable", ruby: "4.0" }
+          - { redmine: "6.1-stable", ruby: "3.4" }
+          - { redmine: "6.0-stable", ruby: "3.3" }
     env:
       RAILS_ENV: test
       BUNDLE_WITHOUT: development

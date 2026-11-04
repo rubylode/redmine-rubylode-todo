@@ -4,6 +4,12 @@ All notable changes to this plugin. The format follows [Keep a Changelog](https:
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-04
+
+### Changed
+
+- Runs on Redmine 6.0 and newer. The plugin's own tests pass unchanged on those versions; no code changed.
+
 ## [1.1.2] - 2026-11-03
 
 ### Added
