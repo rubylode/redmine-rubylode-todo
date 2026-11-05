@@ -4,6 +4,14 @@ All notable changes to this plugin. The format follows [Keep a Changelog](https:
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-05
+
+No change to what the plugin does. This release carries the documentation and the build.
+
+### Changed
+
+- The workflows use the current versions of the GitHub actions, and Dependabot sends one grouped update a month instead of one pull request per action.
+
 ## [2.0.0] - 2026-11-04
 
 Brings the plugin to the Rubylode plugin standard. The To-do page, its routes and the JSON endpoints behave as before.
@@ -98,7 +106,8 @@ First release. Redmine 7.0 and newer.
 - A ticket opens in a dialog over the list, with the full edit form.
 - Tested on Redmine 7.0.2 and 7.0-stable, with Ruby 3.4 and 4.0.
 
-[Unreleased]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.0.0...main
+[Unreleased]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.0...main
+[2.1.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v1.2.1...v2.0.0
 [1.1.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rubylode/redmine-rubylode-todo/releases/tag/v1.0.0

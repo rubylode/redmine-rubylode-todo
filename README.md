@@ -58,7 +58,7 @@ then migrate inside the container and restart it:
     docker compose exec redmine bundle exec rake redmine:plugins:migrate RAILS_ENV=production
     docker compose restart redmine
 
-To upgrade, `git pull`, run the migration again (it does nothing when there is nothing new) and restart. Version 2.0.0
+To upgrade, `git pull`, run the migration again (it does nothing when there is nothing new) and restart. Version 2.1.0
 renames no saved setting, so settings saved under 1.x keep working.
 
 To remove it, run the line below, delete the folder and restart. This drops the order table. Tickets are not touched.

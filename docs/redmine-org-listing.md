@@ -13,11 +13,11 @@ The text to paste at www.redmine.org, Plugins, New plugin. Redmine's "Check for 
 
 ## Notes for this version
 
-Version 2.0.0. A to-do list over a project's tickets: nested lines, checkboxes, drag and drop, keyboard editing. Needs Redmine 7.0 or newer. Install and settings are described in the README at https://github.com/rubylode/redmine-rubylode-todo.
+Version 2.1.0. A to-do list over a project's tickets: nested lines, checkboxes, drag and drop, keyboard editing. Needs Redmine 7.0 or newer. Install and settings are described in the README at https://github.com/rubylode/redmine-rubylode-todo.
 
 ## File to upload
 
-`redmine_rubylode_todo-2.0.0.zip`, the file the GitHub release workflow publishes when a `v2.0.0` tag is pushed. Upload the same file that is attached to the GitHub release.
+`redmine_rubylode_todo-2.1.0.zip`, the file the GitHub release workflow publishes when a `v2.0.0` tag is pushed. Upload the same file that is attached to the GitHub release.
 
 ## Checking the result
 
