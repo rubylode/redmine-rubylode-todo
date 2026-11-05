@@ -24,14 +24,14 @@ jobs:
       RAILS_ENV: test
       BUNDLE_WITHOUT: development
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: redmine/redmine
           github-server-url: https://github.com
           ref: ${{ matrix.redmine }}
           path: redmine
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           path: redmine/plugins/redmine_rubylode_todo
 
@@ -61,7 +61,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build the zip
         run: git archive --format=zip --prefix=redmine_rubylode_todo/ -o redmine_rubylode_todo-${{ github.sha }}.zip HEAD
