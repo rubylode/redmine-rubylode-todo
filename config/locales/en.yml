@@ -1,7 +1,7 @@
 en:
   # Redmine reads these three by their flat names: the menu caption, the module name and the permission name.
   label_todo: To-do
-  project_module_rubylode_todo: To-do
+  project_module_rubylode_todo: Rubylode To-do
   permission_use_rubylode_todo: Use the to-do list
 
   rubylode_todo:

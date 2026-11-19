@@ -66,6 +66,11 @@ class RubylodeTodoSettingsTest < ActiveSupport::TestCase
     assert_equal %w[label_todo permission_use_rubylode_todo project_module_rubylode_todo], flat.sort
   end
 
+  test "the project module carries the Rubylode name and the menu stays short" do
+    assert_equal "Rubylode To-do", I18n.t("project_module_rubylode_todo")
+    assert_equal "To-do", I18n.t("label_todo")
+  end
+
   test "no plugin text contains an em or en dash" do
     texts = I18n.t("rubylode_todo").to_s
     refute_match(/[–—]/, texts)
