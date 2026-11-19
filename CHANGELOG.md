@@ -4,6 +4,12 @@ All notable changes to this plugin. The format follows [Keep a Changelog](https:
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-11-19
+
+### Changed
+
+- The project module is named "Rubylode To-do" in Settings > Modules. The menu tab stays "To-do".
+
 ## [2.1.0] - 2026-11-05
 
 No change to what the plugin does. This release carries the documentation and the build.
@@ -106,7 +112,8 @@ First release. Redmine 7.0 and newer.
 - A ticket opens in a dialog over the list, with the full edit form.
 - Tested on Redmine 7.0.2 and 7.0-stable, with Ruby 3.4 and 4.0.
 
-[Unreleased]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.0...main
+[Unreleased]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.1...main
+[2.1.1]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v1.2.1...v2.0.0
 [1.1.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v1.0.0...v1.1.0
