@@ -110,6 +110,50 @@ def close_family
     assert_equal [false, false, false], [@ticket, child, grandchild].map { |ticket| ticket.reload.closed? }
   end
 
+  # A private subtask by someone else, which jsmith cannot see once his role sees only public tickets and his own.
+  def hidden_child(parent, status_id: nil)
+    Role.find(1).update!(issues_visibility: "default")
+    child = Issue.generate!(project_id: @project.id, subject: "Private step", parent_issue_id: parent.id,
+                            is_private: true, author_id: 1, assigned_to_id: nil)
+    child.update_columns(status_id: status_id) if status_id
+    assert_not child.visible?(User.find_by(login: "jsmith"))
+    child
+  end
+
+  test "the first click on a parent with an open subtask the person cannot see answers no count" do
+    Issue.generate!(project_id: @project.id, subject: "Find the bill", parent_issue_id: @ticket.id)
+    hidden_child(@ticket)
+    post "/projects/ecookbook/todo/lines/#{@ticket.id}/close"
+    assert_response :unprocessable_content
+    assert_nil response.parsed_body["open_descendant_count"]
+    assert_not @ticket.reload.closed?
+  end
+
+  test "a parent with an open subtask the person cannot see is not closed, and no count is given" do
+    child = Issue.generate!(project_id: @project.id, subject: "Find the bill", parent_issue_id: @ticket.id)
+    hidden = hidden_child(@ticket)
+    post "/projects/ecookbook/todo/lines/#{@ticket.id}/close", params: { close_subtree: "1" }
+    assert_response :unprocessable_content
+    assert_nil response.parsed_body["open_descendant_count"]
+    assert_match "##{@ticket.id}", response.parsed_body["error"]
+    assert_equal [false, false, false], [@ticket, child, hidden].map { |ticket| ticket.reload.closed? }
+  end
+
+  test "the reopen question counts only the subtasks the person can see, and reopening leaves the hidden ones alone" do
+    child = Issue.generate!(project_id: @project.id, subject: "Find the bill", parent_issue_id: @ticket.id)
+    closed_status_id = IssueStatus.where(is_closed: true).first.id
+    hidden = hidden_child(@ticket, status_id: closed_status_id)
+    [@ticket, child].each { |ticket| ticket.reload.update_columns(status_id: closed_status_id) }
+
+    delete "/projects/ecookbook/todo/lines/#{@ticket.id}/close"
+    assert_response :conflict
+    assert_equal 1, response.parsed_body["closed_descendant_count"]
+
+    delete "/projects/ecookbook/todo/lines/#{@ticket.id}/close", params: { reopen_subtree: "1" }
+    assert_response :success
+    assert_equal [false, false, true], [@ticket, child, hidden].map { |ticket| ticket.reload.closed? }
+  end
+
   test "a subtree that cannot be reopened completely is left as it was" do
     child, grandchild = close_family
     grandchild.reload.update_columns(tracker_id: 2) # a tracker whose workflow lets nobody reopen

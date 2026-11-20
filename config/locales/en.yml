@@ -76,6 +76,7 @@ en:
     error:
       blank_subject: The line is empty.
       no_status_allowed: "Your role cannot move %{ticket} to that status."
+      hidden_open_subtasks: "%{ticket} has open subtasks you cannot see, so it cannot be closed."
       no_subtask_right: "Your role cannot make a ticket a subtask."
       too_many_lines: "Paste at most %{count} lines at a time."
       request_failed: The change could not be saved. Reload the page and try again.

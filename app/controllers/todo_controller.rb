@@ -78,8 +78,16 @@ class TodoController < ApplicationController
     end
   end
 
+  # Closes a ticket, and after one confirmation the open tickets below it. Only subtasks the person can see are counted
+  # or touched. Redmine refuses to close a ticket while any subtask is open, so a hidden open one ends it here, with a
+  # message that gives no count.
   def close
-    open_descendants = @ticket.descendants.reject(&:closed?)
+    visible_descendants = @ticket.descendants.visible.to_a
+    if @ticket.descendants.open.where.not(id: visible_descendants.map(&:id)).exists?
+      return render_failure(l("rubylode_todo.error.hidden_open_subtasks", ticket: "##{@ticket.id}"))
+    end
+
+    open_descendants = visible_descendants.reject(&:closed?)
     if open_descendants.any? && params[:close_subtree] != "1"
       return render json: { open_descendant_count: open_descendants.size }, status: :conflict
     end
@@ -95,9 +103,10 @@ class TodoController < ApplicationController
     failure ? render_failure(failure) : render(json: { id: @ticket.id })
   end
 
-  # Undoes a close, including the tickets below it that are closed, after one confirmation.
+  # Undoes a close, including the tickets below it that are closed, after one confirmation. Subtasks the person cannot
+  # see are neither counted nor reopened.
   def reopen
-    closed_descendants = @ticket.descendants.select(&:closed?)
+    closed_descendants = @ticket.descendants.visible.select(&:closed?)
     if closed_descendants.any? && params[:reopen_subtree] != "1"
       return render json: { closed_descendant_count: closed_descendants.size }, status: :conflict
     end

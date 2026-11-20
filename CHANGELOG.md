@@ -4,6 +4,17 @@ All notable changes to this plugin. The format follows [Keep a Changelog](https:
 
 ## [Unreleased]
 
+### Security
+
+- Closing or reopening a line with subtasks counted every subtask, including private ones and ones the person cannot see,
+  and the confirmation question showed that count. Now only the subtasks the person can see are counted, closed or reopened.
+  Nothing hidden could be changed before either: each change already checked that the person may see and edit the ticket.
+
+### Fixed
+
+- A line with an open subtask the person cannot see used to ask "close N subtasks too?" and then fail, because Redmine never
+  closes a ticket while a subtask is open. It now stops at once: "#123 has open subtasks you cannot see, so it cannot be closed."
+
 ## [2.1.2] - 2026-11-19
 
 ### Changed
