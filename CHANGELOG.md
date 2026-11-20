@@ -4,6 +4,12 @@ All notable changes to this plugin. The format follows [Keep a Changelog](https:
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-11-19
+
+### Changed
+
+- The release zip holds only what Redmine needs: the tests, the docs and the development scripts are left out.
+
 ## [2.1.1] - 2026-11-19
 
 ### Changed
@@ -112,7 +118,8 @@ First release. Redmine 7.0 and newer.
 - A ticket opens in a dialog over the list, with the full edit form.
 - Tested on Redmine 7.0.2 and 7.0-stable, with Ruby 3.4 and 4.0.
 
-[Unreleased]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.1...main
+[Unreleased]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.2...main
+[2.1.2]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/rubylode/redmine-rubylode-todo/compare/v1.2.1...v2.0.0
